@@ -1,0 +1,14 @@
+<section class="home">
+  <h1 class="home__title">Scegli una sfida</h1>
+  <p class="home__subtitle">Seleziona l'esercizio con cui vuoi allenarti oggi.</p>
+
+  <div class="home__grid">
+    @for (challenge of challenges; track challenge.route) {
+      <a class="challenge-card" [routerLink]="challenge.route">
+        <span class="challenge-card__icon">{{ challenge.icon }}</span>
+        <h2 class="challenge-card__title">{{ challenge.title }}</h2>
+        <p class="challenge-card__description">{{ challenge.description }}</p>
+      </a>
+    }
+  </div>
+</section>

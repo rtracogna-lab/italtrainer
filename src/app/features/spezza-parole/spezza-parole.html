@@ -1,0 +1,53 @@
+<section class="challenge-view">
+  <a class="challenge-view__back" routerLink="/">← Torna alla scelta della sfida</a>
+  <h1 class="challenge-view__title">✂️ Spezza le Parole</h1>
+
+  @if (!isFinished()) {
+    <p class="progress">Frase {{ currentIndex() + 1 }} di {{ total }} · Punteggio: {{ score() }}</p>
+
+    <div class="exercise-card">
+      <p class="exercise-card__clue">{{ current().clue }}</p>
+      <p class="exercise-card__hint">Clicca tra le lettere per aggiungere lo spazio giusto.</p>
+
+      <p class="split-row">
+        @for (letter of current().letters; track $index; let i = $index; let last = $last) {
+          <span class="split-letter">{{ letter }}</span>
+          @if (!last) {
+            <button
+              type="button"
+              class="split-gap"
+              [class.split-gap--active]="userGaps().has(i)"
+              [class.split-gap--correct]="checked() && userGaps().has(i) && current().correctGaps.has(i)"
+              [class.split-gap--missed]="checked() && !userGaps().has(i) && current().correctGaps.has(i)"
+              [class.split-gap--wrong]="checked() && userGaps().has(i) && !current().correctGaps.has(i)"
+              [disabled]="checked()"
+              (click)="toggleGap(i)"
+              [attr.aria-label]="'spazio dopo ' + letter"
+            ></button>
+          }
+        }
+      </p>
+
+      @if (!checked()) {
+        <button type="button" class="next-btn" (click)="check()">Controlla</button>
+      } @else {
+        <p class="feedback" [class.feedback--correct]="isCorrect()" [class.feedback--wrong]="!isCorrect()">
+          @if (isCorrect()) {
+            ✅ Esatto!
+          } @else {
+            ❌ La frase giusta è: "{{ current().text }}"
+          }
+        </p>
+        <button type="button" class="next-btn" (click)="next()">
+          {{ currentIndex() + 1 < total ? 'Prossima frase →' : 'Vedi il risultato' }}
+        </button>
+      }
+    </div>
+  } @else {
+    <div class="result-card">
+      <h2>Hai finito! 🎉</h2>
+      <p>Punteggio: {{ score() }} su {{ total }}</p>
+      <button type="button" class="next-btn" (click)="restart()">Ricomincia</button>
+    </div>
+  }
+</section>

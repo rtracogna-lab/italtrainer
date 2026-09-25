@@ -1,0 +1,51 @@
+<section class="challenge-view">
+  <a class="challenge-view__back" routerLink="/">← Torna alla scelta della sfida</a>
+  <h1 class="challenge-view__title">🔤 Doppie</h1>
+
+  @if (!isFinished()) {
+    <p class="progress">Parola {{ currentIndex() + 1 }} di {{ total }} · Punteggio: {{ score() }}</p>
+
+    <div class="exercise-card">
+      <p class="exercise-card__clue">{{ current().clue }}</p>
+      <p class="exercise-card__text">
+        {{ current().prefix }}<span class="exercise-card__blank">{{ selected() ?? '···' }}</span>{{
+          current().suffix
+        }}
+      </p>
+
+      <div class="options">
+        @for (option of shuffledOptions(); track option) {
+          <button
+            type="button"
+            class="option-btn"
+            [class.option-btn--correct]="answered() && option === current().missing"
+            [class.option-btn--wrong]="answered() && option === selected() && option !== current().missing"
+            [disabled]="answered()"
+            (click)="selectOption(option)"
+          >
+            {{ option }}
+          </button>
+        }
+      </div>
+
+      @if (answered()) {
+        <p class="feedback" [class.feedback--correct]="isCorrect()" [class.feedback--wrong]="!isCorrect()">
+          @if (isCorrect()) {
+            ✅ Bravo! È corretto.
+          } @else {
+            ❌ La parola giusta è "{{ current().prefix }}{{ current().missing }}{{ current().suffix }}".
+          }
+        </p>
+        <button type="button" class="next-btn" (click)="next()">
+          {{ currentIndex() + 1 < total ? 'Prossima parola →' : 'Vedi il risultato' }}
+        </button>
+      }
+    </div>
+  } @else {
+    <div class="result-card">
+      <h2>Hai finito! 🎉</h2>
+      <p>Punteggio: {{ score() }} su {{ total }}</p>
+      <button type="button" class="next-btn" (click)="restart()">Ricomincia</button>
+    </div>
+  }
+</section>

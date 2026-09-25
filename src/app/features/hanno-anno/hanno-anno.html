@@ -1,0 +1,49 @@
+<section class="challenge-view">
+  <a class="challenge-view__back" routerLink="/">← Torna alla scelta della sfida</a>
+  <h1 class="challenge-view__title">📅 Hanno / Anno</h1>
+
+  @if (!isFinished()) {
+    <p class="progress">Frase {{ currentIndex() + 1 }} di {{ total }} · Punteggio: {{ score() }}</p>
+
+    <div class="exercise-card">
+      <p class="exercise-card__text">
+        {{ current().before }} <span class="exercise-card__blank">{{ selected() ?? '···' }}</span>
+        {{ current().after }}
+      </p>
+
+      <div class="options">
+        @for (option of current().options; track option) {
+          <button
+            type="button"
+            class="option-btn"
+            [class.option-btn--correct]="answered() && option === current().answer"
+            [class.option-btn--wrong]="answered() && option === selected() && option !== current().answer"
+            [disabled]="answered()"
+            (click)="selectOption(option)"
+          >
+            {{ option }}
+          </button>
+        }
+      </div>
+
+      @if (answered()) {
+        <p class="feedback" [class.feedback--correct]="isCorrect()" [class.feedback--wrong]="!isCorrect()">
+          @if (isCorrect()) {
+            ✅ Esatto!
+          } @else {
+            ❌ La risposta giusta è "{{ current().answer }}".
+          }
+        </p>
+        <button type="button" class="next-btn" (click)="next()">
+          {{ currentIndex() + 1 < total ? 'Prossima frase →' : 'Vedi il risultato' }}
+        </button>
+      }
+    </div>
+  } @else {
+    <div class="result-card">
+      <h2>Hai finito! 🎉</h2>
+      <p>Punteggio: {{ score() }} su {{ total }}</p>
+      <button type="button" class="next-btn" (click)="restart()">Ricomincia</button>
+    </div>
+  }
+</section>
