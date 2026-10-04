@@ -1,0 +1,11 @@
+.rule-letter {
+  font-weight: 700;
+
+  &--vowel {
+    color: #c62828;
+  }
+
+  &--consonant {
+    color: #1565c0;
+  }
+}

@@ -42,6 +42,11 @@ export const routes: Routes = [
     title: 'ItalTrainer - Qui Quo Qua',
   },
   {
+    path: 'ce-cie',
+    loadComponent: () => import('./features/ce-cie/ce-cie').then((m) => m.CeCie),
+    title: 'ItalTrainer - Ce, Cie, Ge, Gie',
+  },
+  {
     path: '**',
     redirectTo: '',
   },

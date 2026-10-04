@@ -52,5 +52,11 @@ export class Home {
       icon: '💧',
       route: '/qui-quo-qua',
     },
+    {
+      title: 'Ce, Cie, Ge, Gie',
+      description: 'Scegli tra "ce/cie", "sce/scie" e "ge/gie", come in cielo, scienza e igiene.',
+      icon: '☁️',
+      route: '/ce-cie',
+    },
   ];
 }
