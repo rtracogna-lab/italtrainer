@@ -1,24 +1,22 @@
 import { Component, computed, inject, OnDestroy, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Tts } from '../../shared/tts';
-import { DETTATI, Dettato as DettatoText, LEVELS, splitIntoChunks } from './dettati';
+import { DETTATI, Dettato as DettatoText, LEVELS, paragraphs, plainText, splitIntoChunks } from './dettati';
 
 type Phase = 'preview' | 'dictation' | 'done';
 
+// Lettura iniziale: il testo intero viene letto due volte a velocità normale.
 const NORMAL_RATE = 1;
-const SLOW_RATE = 0.7;
-const DICTATION_RATE = 0.7;
 const PAUSE_BETWEEN_READINGS_MS = 2000;
+const DICTATION_RATE = 0.7;
 // Tempo per scrivere un gruppo di parole: una base più un tanto a parola.
 const WRITING_BASE_MS = 2000;
-const WRITING_PER_WORD_MS = 3500;
+const WRITING_PER_WORD_MS = 1000;
 // Ogni gruppo viene letto prima di fila, poi, dopo una breve pausa, ripetuto
 // lentamente una parola alla volta per SLOW_REPEATS volte.
 const PAUSE_BEFORE_REPEAT_MS = 1000;
 const SLOW_REPEATS = 2;
-// Pausa tra una parola e l'altra nella lettura lenta iniziale...
-const READING_WORD_PAUSE_MS = 500;
-// ...e nella seconda lettura di ogni gruppo durante la dettatura.
+// Pausa tra una parola e l'altra nelle ripetizioni lente.
 const DICTATION_WORD_PAUSE_MS = 1000;
 
 const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
@@ -38,11 +36,13 @@ export class Dettato implements OnDestroy {
 
   protected readonly selected = signal<DettatoText | null>(null);
   protected readonly phase = signal<Phase>('preview');
-  // Lettura iniziale del testo intero (normale, poi lenta).
+  // Lettura iniziale del testo intero (due volte).
   protected readonly listening = signal(false);
   protected readonly chunkIndex = signal(0);
   protected readonly paused = signal(false);
 
+  protected readonly text = computed(() => plainText(this.selected()?.text ?? ''));
+  protected readonly paragraphs = computed(() => paragraphs(this.selected()?.text ?? ''));
   protected readonly chunks = computed(() => {
     const dettato = this.selected();
     return dettato ? splitIntoChunks(dettato.text) : [];
@@ -65,7 +65,7 @@ export class Dettato implements OnDestroy {
   }
 
   protected async listen(): Promise<void> {
-    const text = this.selected()?.text;
+    const text = this.text();
     if (!text) {
       return;
     }
@@ -76,7 +76,7 @@ export class Dettato implements OnDestroy {
       await delay(PAUSE_BETWEEN_READINGS_MS);
     }
     if (id === this.run) {
-      await this.speakWords(text.split(/\s+/), SLOW_RATE, READING_WORD_PAUSE_MS, id);
+      await this.tts.speak(text, NORMAL_RATE);
     }
     if (id === this.run) {
       this.listening.set(false);

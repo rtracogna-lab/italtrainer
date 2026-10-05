@@ -14,7 +14,11 @@
 
       @switch (phase()) {
         @case ('preview') {
-          <p class="dettato__text">{{ dettato.text }}</p>
+          <div class="dettato__text">
+            @for (paragraph of paragraphs(); track $index) {
+              <p>{{ paragraph }}</p>
+            }
+          </div>
           <p class="exercise-card__hint">
             {{ listening() ? '🔊 Ascolta bene il dettato…' : 'Quando sei pronto, prendi il foglio e premi "Dettatura".' }}
           </p>
@@ -40,7 +44,11 @@
         }
         @case ('done') {
           <p class="feedback feedback--correct">✅ Dettato finito! Ora controlla e datti un voto!</p>
-          <p class="dettato__text">{{ dettato.text }}</p>
+          <div class="dettato__text">
+            @for (paragraph of paragraphs(); track $index) {
+              <p>{{ paragraph }}</p>
+            }
+          </div>
           <div class="dettato__actions">
             <button type="button" class="speak-btn" (click)="startDictation()">🔁 Rifai il dettato</button>
             <button type="button" class="next-btn" (click)="backToList()">Scegli un altro dettato</button>

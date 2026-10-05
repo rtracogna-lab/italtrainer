@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { Tts } from '../../shared/tts';
 import { Dettato } from './dettato';
-import { DETTATI, splitIntoChunks } from './dettati';
+import { DETTATI, paragraphs, plainText, splitIntoChunks } from './dettati';
 
 describe('splitIntoChunks', () => {
   it('should split on punctuation and never right after an article or preposition', () => {
@@ -14,6 +14,19 @@ describe('splitIntoChunks', () => {
       'Poi dorme al sole',
       'sul divano.',
     ]);
+  });
+
+  it('should honour manual " / " breaks and hide them from the text', () => {
+    const text = 'L’arbitro fischia / se c’è un fallo.';
+    expect(splitIntoChunks(text).map((chunk) => chunk.text)).toEqual(['L’arbitro fischia', 'se c’è un fallo.']);
+    expect(plainText(text)).toBe('L’arbitro fischia se c’è un fallo.');
+  });
+
+  it('should say "a capo" at " // " and start a new line there', () => {
+    const text = 'Il calcio è bello. // La partita è lunga / e faticosa //';
+    expect(splitIntoChunks(text).map((chunk) => chunk.spoken.at(-1))).toEqual(['punto e a capo', 'lunga', 'a capo']);
+    expect(paragraphs(text)).toEqual(['Il calcio è bello.', 'La partita è lunga e faticosa']);
+    expect(plainText(text)).toBe('Il calcio è bello. La partita è lunga e faticosa');
   });
 
   it('should say punctuation out loud', () => {
@@ -58,20 +71,15 @@ describe('Dettato', () => {
   const buttons = (): HTMLButtonElement[] => Array.from(fixture.nativeElement.querySelectorAll('button'));
   const click = (label: string) => buttons().find((button) => button.textContent!.includes(label))!.click();
 
-  it('should read the text twice, the second time word by word', async () => {
+  it('should read the whole text twice, with a pause in between', async () => {
     const { title, text } = DETTATI[1];
     click(title);
     await vi.advanceTimersByTimeAsync(1000);
-    // Prima lettura a velocità normale, tutta di fila.
     expect(spoken).toEqual([text]);
 
-    await vi.advanceTimersByTimeAsync(2600);
-    // Seconda lettura lenta: una parola, mezzo secondo di pausa, la successiva...
-    expect(spoken).toEqual([text, 'Oggi', 'vado', 'al', 'parco']);
-
-    await vi.advanceTimersByTimeAsync(60_000);
+    await vi.advanceTimersByTimeAsync(1000);
     fixture.detectChanges();
-    expect(spoken.slice(1)).toEqual(text.split(' '));
+    expect(spoken).toEqual([text, text]);
     expect(el('.dettato__text').textContent).toContain('nonna');
   });
 
