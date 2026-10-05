@@ -1,0 +1,65 @@
+<section class="challenge-view">
+  <a class="challenge-view__back" routerLink="/">← Torna alla scelta della sfida</a>
+  <h1 class="challenge-view__title">✏️ Dettato</h1>
+
+  @if (!tts.supported) {
+    <p class="challenge-view__placeholder">
+      ⚠️ Questo browser non sa leggere ad alta voce: prova con Edge o Chrome.
+    </p>
+  }
+
+  @if (selected(); as dettato) {
+    <div class="exercise-card">
+      <h2 class="dettato__title">{{ dettato.title }}</h2>
+
+      @switch (phase()) {
+        @case ('preview') {
+          <p class="dettato__text">{{ dettato.text }}</p>
+          <p class="exercise-card__hint">
+            {{ listening() ? '🔊 Ascolta bene il dettato…' : 'Quando sei pronto, prendi il foglio e premi "Dettatura".' }}
+          </p>
+          <div class="dettato__actions">
+            <button type="button" class="speak-btn" (click)="listen()">🔊 Riascolta</button>
+            <button type="button" class="next-btn" (click)="startDictation()">🗣️ Dettatura</button>
+          </div>
+        }
+        @case ('dictation') {
+          <p class="dettato__status">{{ paused() ? '⏸️ In pausa' : '✍️ Scrivi sul foglio…' }}</p>
+          <p class="exercise-card__hint">Parte {{ chunkIndex() + 1 }} di {{ chunks().length }}</p>
+          <div class="dettato__bar">
+            <div class="dettato__bar-fill" [style.width.%]="progress()"></div>
+          </div>
+          <div class="dettato__actions">
+            <button type="button" class="speak-btn" (click)="togglePause()">
+              {{ paused() ? '▶️ Riprendi' : '⏸️ Pausa' }}
+            </button>
+            <button type="button" class="speak-btn" (click)="repeat()">🔁 Ripeti</button>
+            <button type="button" class="speak-btn" (click)="nextChunk()">⏭️ Prossimo</button>
+            <button type="button" class="speak-btn" (click)="restartDictation()">⏮️ Ricomincia</button>
+          </div>
+        }
+        @case ('done') {
+          <p class="feedback feedback--correct">✅ Dettato finito! Ora controlla e datti un voto!</p>
+          <p class="dettato__text">{{ dettato.text }}</p>
+          <div class="dettato__actions">
+            <button type="button" class="speak-btn" (click)="startDictation()">🔁 Rifai il dettato</button>
+            <button type="button" class="next-btn" (click)="backToList()">Scegli un altro dettato</button>
+          </div>
+        }
+      }
+    </div>
+
+    @if (phase() === 'preview') {
+      <button type="button" class="dettato__back" (click)="backToList()">← Scegli un altro dettato</button>
+    }
+  } @else {
+    @for (level of levels; track level.id) {
+      <h2 class="dettato__level">Livello: {{ level.label }}</h2>
+      <div class="dettato__list">
+        @for (dettato of level.dettati; track dettato.title) {
+          <button type="button" class="option-btn" (click)="choose(dettato)">{{ dettato.title }}</button>
+        }
+      </div>
+    }
+  }
+</section>

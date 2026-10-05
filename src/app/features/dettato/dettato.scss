@@ -1,0 +1,72 @@
+.dettato {
+  &__level {
+    margin: 1.5rem 0 1rem;
+    font-size: 1.2rem;
+  }
+
+  &__list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+  }
+
+  &__title {
+    margin: 0 0 1rem;
+    font-size: 1.3rem;
+  }
+
+  &__text {
+    margin: 0 0 1.5rem;
+    font-size: 1.5rem;
+    line-height: 1.6;
+    text-align: left;
+  }
+
+  &__status {
+    margin: 1rem 0 0.5rem;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #2b3a67;
+  }
+
+  &__bar {
+    max-width: 300px;
+    height: 8px;
+    margin: 0 auto 1.5rem;
+    border-radius: 4px;
+    background: #e3e7f0;
+    overflow: hidden;
+  }
+
+  &__bar-fill {
+    height: 100%;
+    background: #2b3a67;
+    transition: width 0.3s ease;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  &__back {
+    margin-top: 1rem;
+    border: none;
+    background: none;
+    color: #2b3a67;
+    font-size: 1rem;
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.dettato__actions .speak-btn {
+  margin: 0;
+}

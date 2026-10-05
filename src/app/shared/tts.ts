@@ -17,18 +17,23 @@ export class Tts {
     speechSynthesis.addEventListener('voiceschanged', () => this.pickVoice());
   }
 
-  speak(text: string): void {
+  // La Promise si risolve quando la lettura finisce o viene interrotta.
+  speak(text: string, rate = 0.85): Promise<void> {
     if (!this.supported) {
-      return;
+      return Promise.resolve();
     }
     speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'it-IT';
-    utterance.rate = 0.85;
+    utterance.rate = rate;
     if (this.voice) {
       utterance.voice = this.voice;
     }
-    speechSynthesis.speak(utterance);
+    return new Promise((resolve) => {
+      utterance.onend = () => resolve();
+      utterance.onerror = () => resolve();
+      speechSynthesis.speak(utterance);
+    });
   }
 
   cancel(): void {

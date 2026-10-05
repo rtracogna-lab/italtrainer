@@ -58,5 +58,11 @@ export class Home {
       icon: '☁️',
       route: '/ce-cie',
     },
+    {
+      title: 'Dettato',
+      description: 'Ascolta il dettato e scrivilo sul foglio, una parte alla volta.',
+      icon: '✏️',
+      route: '/dettato',
+    },
   ];
 }

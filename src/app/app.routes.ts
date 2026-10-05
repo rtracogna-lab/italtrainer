@@ -47,6 +47,11 @@ export const routes: Routes = [
     title: 'ItalTrainer - Ce, Cie, Ge, Gie',
   },
   {
+    path: 'dettato',
+    loadComponent: () => import('./features/dettato/dettato').then((m) => m.Dettato),
+    title: 'ItalTrainer - Dettato',
+  },
+  {
     path: '**',
     redirectTo: '',
   },
