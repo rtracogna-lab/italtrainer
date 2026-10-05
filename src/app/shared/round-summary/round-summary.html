@@ -1,0 +1,49 @@
+<div class="round-summary" [class.round-summary--dictating]="dictating() !== null">
+  <ol class="summary">
+    @for (word of words(); track $index) {
+      <li class="summary__item" [class.summary__item--current]="dictating() === $index">
+        {{ word.prefix }}<span
+          class="summary__letters"
+          [class.summary__letters--correct]="word.given === word.missing"
+          [class.summary__letters--wrong]="word.given !== word.missing"
+          >{{ word.missing }}</span
+        >{{ word.suffix }}
+        @if (word.given !== word.missing) {
+          <span class="summary__given">(avevi scelto “{{ word.given }}”)</span>
+        }
+      </li>
+    }
+  </ol>
+
+  @if (currentWord(); as word) {
+    <div class="dictation">
+      <p class="dictation__progress">Parola {{ dictating()! + 1 }} di {{ words().length }}</p>
+      <p class="dictation__word">
+        {{ word.prefix }}<span class="dictation__letters">{{ word.missing }}</span>{{ word.suffix }}
+      </p>
+      <p class="dictation__timer">⏱️ {{ secondsLeft() }} s</p>
+      <div class="dictation__bar">
+        <div class="dictation__bar-fill" [style.width.%]="(secondsLeft() / secondsPerWord) * 100"></div>
+      </div>
+      <div class="dictation__actions">
+        <button type="button" class="speak-btn" (click)="skipWord()">Prossima parola →</button>
+        <button type="button" class="speak-btn" (click)="stopDictation()">⏹ Ferma</button>
+      </div>
+    </div>
+  }
+</div>
+
+@if (dictating() === null) {
+  @if (dictationDone()) {
+    <p class="dictation-done">✍️ Dettatura finita! Controlla sul foglio le parole che hai scritto.</p>
+  }
+  <div class="summary-actions">
+    @if (tts.supported) {
+      <button type="button" class="next-btn dictation-start" (click)="startDictation()">
+        🗣️ {{ dictationDone() ? 'Rifai la dettatura' : 'Dettatura' }}
+      </button>
+    }
+    <!-- Pulsanti del gioco (es. "Ricomincia"), affiancati a quello della dettatura. -->
+    <ng-content />
+  </div>
+}

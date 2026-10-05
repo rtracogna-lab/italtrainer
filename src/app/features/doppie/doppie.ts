@@ -1,6 +1,8 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { RoundSummary, SummaryWord } from '../../shared/round-summary/round-summary';
 import { shuffle } from '../../shared/shuffle';
+import { Tts } from '../../shared/tts';
 
 interface DoppieWord {
   clue: string;
@@ -62,12 +64,14 @@ function pickRound(): DoppieWord[] {
 }
 
 @Component({
-  imports: [RouterLink],
+  imports: [RouterLink, RoundSummary],
   selector: 'app-doppie',
   styleUrl: './doppie.scss',
   templateUrl: './doppie.html',
 })
 export class Doppie {
+  protected readonly tts = inject(Tts);
+
   protected readonly total = QUESTIONS_PER_ROUND;
 
   protected readonly words = signal(pickRound());
@@ -75,11 +79,21 @@ export class Doppie {
   protected readonly score = signal(0);
   protected readonly selected = signal<string | null>(null);
   protected readonly answered = signal(false);
+  // Risposta data per ogni parola del round, per il riepilogo finale.
+  protected readonly answers = signal<string[]>([]);
+  protected readonly summary = computed<SummaryWord[]>(() =>
+    this.words().map(({ prefix, missing, suffix }, index) => ({ prefix, missing, suffix, given: this.answers()[index] })),
+  );
 
   protected readonly isFinished = computed(() => this.currentIndex() >= this.total);
   protected readonly current = computed(() => this.words()[this.currentIndex()]);
   protected readonly shuffledOptions = computed(() => shuffle(this.current().options));
   protected readonly isCorrect = computed(() => this.selected() === this.current().missing);
+
+  protected speakWord(): void {
+    const { prefix, missing, suffix } = this.current();
+    this.tts.speak(prefix + missing + suffix);
+  }
 
   protected selectOption(option: string): void {
     if (this.answered()) {
@@ -87,6 +101,7 @@ export class Doppie {
     }
     this.selected.set(option);
     this.answered.set(true);
+    this.answers.update((list) => [...list, option]);
     if (option === this.current().missing) {
       this.score.update((value) => value + 1);
     }
@@ -102,6 +117,7 @@ export class Doppie {
     this.words.set(pickRound());
     this.currentIndex.set(0);
     this.score.set(0);
+    this.answers.set([]);
     this.selected.set(null);
     this.answered.set(false);
   }

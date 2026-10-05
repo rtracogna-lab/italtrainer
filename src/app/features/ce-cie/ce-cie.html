@@ -8,6 +8,9 @@
     <div class="exercise-card">
       <p class="exercise-card__clue">{{ current().clue }}</p>
       <p class="exercise-card__hint">{{ current().hint }}</p>
+      @if (tts.supported) {
+        <button type="button" class="speak-btn" aria-label="Ascolta la parola" (click)="speakWord()">🔊 Ascolta</button>
+      }
       <p class="exercise-card__text">
         {{ prefixHead() }}@if (current().plural; as plural) {<span
             class="rule-letter"
@@ -52,7 +55,9 @@
     <div class="result-card">
       <h2>Hai finito! 🎉</h2>
       <p>Punteggio: {{ score() }} su {{ total }}</p>
-      <button type="button" class="next-btn" (click)="restart()">Ricomincia</button>
+      <app-round-summary [words]="summary()">
+        <button type="button" class="next-btn" (click)="restart()">Ricomincia</button>
+      </app-round-summary>
     </div>
   }
 </section>

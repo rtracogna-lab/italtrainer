@@ -1,0 +1,131 @@
+:host {
+  display: block;
+  margin: 0 0 1.5rem;
+}
+
+.round-summary--dictating {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+  text-align: left;
+
+  @media (max-width: 600px) {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+}
+
+.summary {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+
+  &__item {
+    padding: 0.35rem 0.8rem;
+    font-size: 1.2rem;
+    border-radius: 8px;
+    border: 2px solid transparent;
+    background: #f8f9fc;
+
+    &--current {
+      border-color: #2b3a67;
+      background: #e8ecf7;
+    }
+  }
+
+  &__letters {
+    font-weight: 700;
+
+    &--correct {
+      color: #2e7d32;
+    }
+
+    &--wrong {
+      color: #c62828;
+    }
+  }
+
+  &__given {
+    font-size: 0.85rem;
+    color: #666;
+  }
+}
+
+.dictation {
+  flex: 1;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+
+  &__progress {
+    margin: 0;
+    color: #666;
+  }
+
+  &__word {
+    margin: 1rem 0;
+    font-size: clamp(2.5rem, 9vw, 4.5rem);
+    font-weight: 700;
+    color: #2b3a67;
+    word-break: break-word;
+  }
+
+  // Lettere inserite nel gioco: un colore diverso da verde/rosso del
+  // riepilogo, per non confonderle con giusto/sbagliato.
+  &__letters {
+    color: #e65100;
+    text-decoration: underline;
+    text-decoration-thickness: 0.08em;
+    text-underline-offset: 0.12em;
+  }
+
+  &__timer {
+    margin: 0 0 0.5rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+
+  &__bar {
+    width: 100%;
+    max-width: 300px;
+    height: 8px;
+    margin: 0 0 1.25rem;
+    border-radius: 4px;
+    background: #e3e7f0;
+    overflow: hidden;
+  }
+
+  &__bar-fill {
+    height: 100%;
+    background: #2b3a67;
+    transition: width 1s linear;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+}
+
+.dictation-done {
+  margin: 0 0 1rem;
+  font-weight: 600;
+  color: #2e7d32;
+}
+
+.summary-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}

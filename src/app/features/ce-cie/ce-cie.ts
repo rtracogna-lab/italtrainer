@@ -1,6 +1,8 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { RoundSummary, SummaryWord } from '../../shared/round-summary/round-summary';
 import { shuffle } from '../../shared/shuffle';
+import { Tts } from '../../shared/tts';
 
 type CeCieSyllable = 'ce' | 'cie' | 'sce' | 'scie' | 'ge' | 'gie';
 
@@ -166,19 +168,21 @@ const WORDS: CeCieWord[] = [
   { clue: '😢', hint: 'Versare lacrime', prefix: 'pian', missing: 'ge', suffix: 're', tip: GE_TIP },
 ];
 
-const QUESTIONS_PER_ROUND = 20;
+const QUESTIONS_PER_ROUND = 10;
 
 function pickRound(): CeCieWord[] {
   return shuffle(WORDS).slice(0, QUESTIONS_PER_ROUND);
 }
 
 @Component({
-  imports: [RouterLink],
+  imports: [RouterLink, RoundSummary],
   selector: 'app-ce-cie',
   styleUrl: './ce-cie.scss',
   templateUrl: './ce-cie.html',
 })
 export class CeCie {
+  protected readonly tts = inject(Tts);
+
   protected readonly total = QUESTIONS_PER_ROUND;
 
   protected readonly words = signal(pickRound());
@@ -186,6 +190,11 @@ export class CeCie {
   protected readonly score = signal(0);
   protected readonly selected = signal<string | null>(null);
   protected readonly answered = signal(false);
+  // Risposta data per ogni parola del round, per il riepilogo finale.
+  protected readonly answers = signal<string[]>([]);
+  protected readonly summary = computed<SummaryWord[]>(() =>
+    this.words().map(({ prefix, missing, suffix }, index) => ({ prefix, missing, suffix, given: this.answers()[index] })),
+  );
 
   protected readonly isFinished = computed(() => this.currentIndex() >= this.total);
   protected readonly current = computed(() => this.words()[this.currentIndex()]);
@@ -201,12 +210,18 @@ export class CeCie {
   });
   protected readonly isCorrect = computed(() => this.selected() === this.current().missing);
 
+  protected speakWord(): void {
+    const { prefix, missing, suffix } = this.current();
+    this.tts.speak(prefix + missing + suffix);
+  }
+
   protected selectOption(option: string): void {
     if (this.answered()) {
       return;
     }
     this.selected.set(option);
     this.answered.set(true);
+    this.answers.update((list) => [...list, option]);
     if (option === this.current().missing) {
       this.score.update((value) => value + 1);
     }
@@ -222,6 +237,7 @@ export class CeCie {
     this.words.set(pickRound());
     this.currentIndex.set(0);
     this.score.set(0);
+    this.answers.set([]);
     this.selected.set(null);
     this.answered.set(false);
   }
