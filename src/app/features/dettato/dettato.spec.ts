@@ -101,28 +101,37 @@ describe('Dettato', () => {
     await vi.advanceTimersByTimeAsync(3001);
     expect(spoken).toEqual(['Oggi vado al parco', 'Oggi', 'vado', 'al', 'parco']);
 
-    // ...e, dopo altri 2 secondi, una seconda volta lentamente.
+    // ...e altre due volte lentamente (livello base: tre ripetizioni lente).
+    await vi.advanceTimersByTimeAsync(5000);
+    expect(spoken.slice(5)).toEqual(['Oggi', 'vado', 'al', 'parco']);
     await vi.advanceTimersByTimeAsync(4999);
-    expect(spoken.slice(5)).toEqual(['Oggi', 'vado', 'al']);
+    expect(spoken.slice(9)).toEqual(['Oggi', 'vado', 'al']);
 
-    // Finita la seconda ripetizione, il gruppo seguente parte subito.
+    // Finita l'ultima ripetizione, il gruppo seguente parte subito.
     await vi.advanceTimersByTimeAsync(1);
-    expect(spoken.slice(8)).toEqual(['parco', 'con la nonna punto']);
+    expect(spoken.slice(12)).toEqual(['parco', 'con la nonna punto']);
 
     click('Pausa');
     await vi.advanceTimersByTimeAsync(60_000);
-    expect(spoken.length).toBe(10);
+    expect(spoken.length).toBe(14);
 
     click('Ripeti');
     await vi.advanceTimersByTimeAsync(0);
-    expect(spoken.slice(10)).toEqual(['con la nonna punto']);
+    expect(spoken.slice(14)).toEqual(['con la nonna punto']);
 
-    // "Prossimo" salta subito al gruppo seguente.
+    // "Prossimo" salta subito al gruppo seguente...
     click('Prossimo');
     await vi.advanceTimersByTimeAsync(0);
     fixture.detectChanges();
     expect(spoken.at(-1)).toBe('Io gioco sull\'altalena');
     expect(fixture.nativeElement.textContent).toContain('Parte 3 di');
+
+    // ...e "Precedente" torna indietro di uno.
+    click('Precedente');
+    await vi.advanceTimersByTimeAsync(0);
+    fixture.detectChanges();
+    expect(spoken.at(-1)).toBe('con la nonna punto');
+    expect(fixture.nativeElement.textContent).toContain('Parte 2 di');
 
     click('Ricomincia');
     await vi.advanceTimersByTimeAsync(600_000);

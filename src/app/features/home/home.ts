@@ -24,7 +24,7 @@ export class Home {
     },
     {
       title: 'Hanno / Anno',
-      description: 'Impara a distinguere "ha/hanno" (avere) da "a/anno".',
+      description: 'Impara a distinguere "ha/a", "hanno/anno", "ho/o" ed "è/e".',
       icon: '📅',
       route: '/hanno-anno',
     },

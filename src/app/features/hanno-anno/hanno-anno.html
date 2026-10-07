@@ -6,6 +6,9 @@
     <p class="progress">Frase {{ currentIndex() + 1 }} di {{ total }} · Punteggio: {{ score() }}</p>
 
     <div class="exercise-card">
+      @if (tts.supported) {
+        <button type="button" class="speak-btn" aria-label="Ascolta la frase" (click)="speakSentence()">🔊 Ascolta</button>
+      }
       <p class="exercise-card__text">
         {{ current().before }} <span class="exercise-card__blank">{{ selected() ?? '···' }}</span>
         {{ current().after }}
@@ -43,7 +46,9 @@
     <div class="result-card">
       <h2>Hai finito! 🎉</h2>
       <p>Punteggio: {{ score() }} su {{ total }}</p>
-      <button type="button" class="next-btn" (click)="restart()">Ricomincia</button>
+      <app-round-summary [words]="summary()" [dictation]="false">
+        <button type="button" class="next-btn" (click)="restart()">Ricomincia</button>
+      </app-round-summary>
     </div>
   }
 </section>

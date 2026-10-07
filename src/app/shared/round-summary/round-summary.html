@@ -38,7 +38,7 @@
     <p class="dictation-done">✍️ Dettatura finita! Controlla sul foglio le parole che hai scritto.</p>
   }
   <div class="summary-actions">
-    @if (tts.supported) {
+    @if (tts.supported && dictation()) {
       <button type="button" class="next-btn dictation-start" (click)="startDictation()">
         🗣️ {{ dictationDone() ? 'Rifai la dettatura' : 'Dettatura' }}
       </button>

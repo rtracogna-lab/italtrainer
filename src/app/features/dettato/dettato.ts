@@ -14,7 +14,7 @@ const DICTATION_RATE = 0.7;
 // quanta attesa prima del gruppo successivo dipende dal livello.
 const PAUSE_BETWEEN_DICTATIONS_MS = 2000;
 const PACING: Record<DettatoLevel, { slowRepeats: number; pauseAfterChunkMs: number }> = {
-  base: { slowRepeats: 2, pauseAfterChunkMs: 0 },
+  base: { slowRepeats: 3, pauseAfterChunkMs: 0 },
   avanzato: { slowRepeats: 1, pauseAfterChunkMs: 3000 },
 };
 // Pausa tra una parola e l'altra nelle ripetizioni lente.
@@ -106,6 +106,11 @@ export class Dettato implements OnDestroy {
   // Passa subito al gruppo successivo (dall'ultimo, chiude il dettato).
   protected nextChunk(): void {
     this.playFrom(this.chunkIndex() + 1);
+  }
+
+  // Torna al gruppo precedente e lo detta di nuovo.
+  protected previousChunk(): void {
+    this.playFrom(Math.max(0, this.chunkIndex() - 1));
   }
 
   protected restartDictation(): void {

@@ -22,6 +22,8 @@ const REPEAT_EVERY = SECONDS_PER_WORD / REPEATS_PER_WORD;
 })
 export class RoundSummary implements OnDestroy {
   readonly words = input.required<SummaryWord[]>();
+  // Mostra il pulsante della dettatura (ha senso solo per parole singole).
+  readonly dictation = input(true);
 
   protected readonly tts = inject(Tts);
   protected readonly secondsPerWord = SECONDS_PER_WORD;

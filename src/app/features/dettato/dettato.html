@@ -38,6 +38,9 @@
               {{ paused() ? '▶️ Riprendi' : '⏸️ Pausa' }}
             </button>
             <button type="button" class="speak-btn" (click)="repeat()">🔁 Ripeti</button>
+            <button type="button" class="speak-btn" [disabled]="chunkIndex() === 0" (click)="previousChunk()">
+              ⬅️ Precedente
+            </button>
             <button type="button" class="speak-btn" (click)="nextChunk()">⏭️ Prossimo</button>
             <button type="button" class="speak-btn" (click)="restartDictation()">⏮️ Ricomincia</button>
           </div>
