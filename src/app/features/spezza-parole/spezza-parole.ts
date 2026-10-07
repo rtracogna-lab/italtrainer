@@ -1,6 +1,7 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { shuffle } from '../../shared/shuffle';
+import { Tts } from '../../shared/tts';
 
 interface SplitPhrase {
   clue: string;
@@ -71,6 +72,8 @@ function gapSetsMatch(a: Set<number>, b: Set<number>): boolean {
   templateUrl: './spezza-parole.html',
 })
 export class SpezzaParole {
+  protected readonly tts = inject(Tts);
+
   protected readonly total = QUESTIONS_PER_ROUND;
 
   protected readonly items = signal(pickRound());
@@ -84,6 +87,10 @@ export class SpezzaParole {
   protected readonly isCorrect = computed(() =>
     gapSetsMatch(this.userGaps(), this.current().correctGaps),
   );
+
+  protected speakSentence(): void {
+    this.tts.speak(this.current().text);
+  }
 
   protected toggleGap(index: number): void {
     if (this.checked()) {

@@ -1,4 +1,4 @@
-export type DettatoLevel = 'facile';
+export type DettatoLevel = 'base' | 'avanzato';
 
 export interface Dettato {
   title: string;
@@ -6,7 +6,10 @@ export interface Dettato {
   text: string;
 }
 
-export const LEVELS: { id: DettatoLevel; label: string }[] = [{ id: 'facile', label: 'Facile' }];
+export const LEVELS: { id: DettatoLevel; label: string }[] = [
+  { id: 'base', label: 'Base' },
+  { id: 'avanzato', label: 'Avanzato' },
+];
 
 // Testi dei dettati. Per aggiungerne uno basta un nuovo elemento nell'elenco.
 // Una " / " nel testo forza la divisione dei gruppi in quel punto e non viene
@@ -15,17 +18,31 @@ export const LEVELS: { id: DettatoLevel; label: string }[] = [{ id: 'facile', la
 export const DETTATI: Dettato[] = [
   {
     title: 'Il gatto Fufi',
-    level: 'facile',
+    level: 'base',
     text: 'Il gatto di Luca si chiama Fufi. Ogni mattina beve il latte dalla sua ciotola. Poi dorme al sole sul divano.',
   },
   {
     title: 'Al parco con la nonna',
-    level: 'facile',
+    level: 'base',
     text: 'Oggi vado al parco con la nonna. Io gioco sull\'altalena e mio fratello corre sul prato.',
   },
   {
+    title: 'La merenda',
+    level: 'base',
+    text:
+      'Oggi è giovedì e a scuola c’è la festa. Il papà di Sara ha portato una torta. ' +
+      'È buonissima perché è piena di crema. Tutti ne vogliono ancora un po’.',
+  },
+  {
+    title: 'In città',
+    level: 'base',
+    text:
+      'Sabato vado in città con la mamma. Prendiamo il tram vicino a casa. ' +
+      'In piazza c’è un bar con i tavolini fuori. La mamma beve un caffè e io una cioccolata.',
+  },
+  {
     title: 'I videogiochi',
-    level: 'facile',
+    level: 'avanzato',
     text:
       'I videogiochi sono molto divertenti. Molti bambini giocano con la console o il computer. // ' +
       'Alcuni giochi fanno esplorare mondi fantastici. Altri invece sono gare di velocità con le macchine. // ' +
@@ -34,7 +51,7 @@ export const DETTATI: Dettato[] = [
   },
   {
     title: 'Il calcio',
-    level: 'facile',
+    level: 'avanzato',
     text:
       'Il calcio è lo sport più popolare. Molti bambini giocano a pallone nel pomeriggio. // ' +
       'La partita si disputa in un grande stadio. I tifosi fanno il tifo con bandiere e sciarpe. ' +

@@ -95,33 +95,55 @@ describe('Dettato', () => {
     // Prima il gruppo letto di fila...
     expect(spoken).toEqual(['Oggi vado al parco']);
 
-    // ...poi, dopo una breve pausa, una parola alla volta.
-    await vi.advanceTimersByTimeAsync(4000);
+    // ...poi, dopo 2 secondi, una parola alla volta (un secondo tra le parole).
+    await vi.advanceTimersByTimeAsync(1999);
+    expect(spoken.length).toBe(1);
+    await vi.advanceTimersByTimeAsync(3001);
     expect(spoken).toEqual(['Oggi vado al parco', 'Oggi', 'vado', 'al', 'parco']);
 
-    // ...e una seconda volta lentamente.
-    await vi.advanceTimersByTimeAsync(4000);
-    expect(spoken.slice(5)).toEqual(['Oggi', 'vado', 'al', 'parco']);
+    // ...e, dopo altri 2 secondi, una seconda volta lentamente.
+    await vi.advanceTimersByTimeAsync(4999);
+    expect(spoken.slice(5)).toEqual(['Oggi', 'vado', 'al']);
+
+    // Finita la seconda ripetizione, il gruppo seguente parte subito.
+    await vi.advanceTimersByTimeAsync(1);
+    expect(spoken.slice(8)).toEqual(['parco', 'con la nonna punto']);
 
     click('Pausa');
     await vi.advanceTimersByTimeAsync(60_000);
-    expect(spoken.length).toBe(9);
+    expect(spoken.length).toBe(10);
 
     click('Ripeti');
     await vi.advanceTimersByTimeAsync(0);
-    expect(spoken.slice(9)).toEqual(['Oggi vado al parco']);
+    expect(spoken.slice(10)).toEqual(['con la nonna punto']);
 
     // "Prossimo" salta subito al gruppo seguente.
     click('Prossimo');
     await vi.advanceTimersByTimeAsync(0);
     fixture.detectChanges();
-    expect(spoken.at(-1)).toBe('con la nonna punto');
-    expect(fixture.nativeElement.textContent).toContain('Parte 2 di');
+    expect(spoken.at(-1)).toBe('Io gioco sull\'altalena');
+    expect(fixture.nativeElement.textContent).toContain('Parte 3 di');
 
     click('Ricomincia');
     await vi.advanceTimersByTimeAsync(600_000);
     fixture.detectChanges();
     expect(spoken.slice(-4)).toEqual(['corre', 'sul', 'prato', 'punto']);
     expect(el('.dettato__text').textContent).toContain('nonna');
+  });
+
+  it('should repeat each chunk only once in advanced dictations, then wait 3 seconds', async () => {
+    const advanced = DETTATI.find((dettato) => dettato.level === 'avanzato')!;
+    click(advanced.title);
+    await vi.advanceTimersByTimeAsync(60_000);
+    spoken = [];
+
+    click('Dettatura');
+    await vi.advanceTimersByTimeAsync(4000);
+    expect(spoken).toEqual(['I videogiochi sono', 'I', 'videogiochi', 'sono']);
+
+    await vi.advanceTimersByTimeAsync(2999);
+    expect(spoken.length).toBe(4);
+    await vi.advanceTimersByTimeAsync(1);
+    expect(spoken.at(-1)).toBe('molto divertenti punto');
   });
 });

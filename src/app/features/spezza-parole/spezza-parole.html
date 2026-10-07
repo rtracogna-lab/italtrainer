@@ -9,6 +9,10 @@
       <p class="exercise-card__clue">{{ current().clue }}</p>
       <p class="exercise-card__hint">Clicca tra le lettere per aggiungere lo spazio giusto.</p>
 
+      @if (tts.supported) {
+        <button type="button" class="speak-btn" aria-label="Ascolta la frase" (click)="speakSentence()">🔊 Ascolta</button>
+      }
+
       <p class="split-row">
         @for (letter of current().letters; track $index; let i = $index; let last = $last) {
           <span class="split-letter">{{ letter }}</span>

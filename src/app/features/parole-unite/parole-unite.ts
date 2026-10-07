@@ -1,6 +1,7 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { shuffle } from '../../shared/shuffle';
+import { Tts } from '../../shared/tts';
 
 interface SplitSentence {
   before: string;
@@ -140,6 +141,8 @@ function pickRound(): SplitSentence[] {
   templateUrl: './parole-unite.html',
 })
 export class ParoleUnite {
+  protected readonly tts = inject(Tts);
+
   protected readonly total = QUESTIONS_PER_ROUND;
 
   protected readonly sentences = signal(pickRound());
@@ -152,6 +155,11 @@ export class ParoleUnite {
   protected readonly current = computed(() => this.sentences()[this.currentIndex()]);
   protected readonly shuffledOptions = computed(() => shuffle(this.current().options));
   protected readonly isCorrect = computed(() => this.selected() === this.current().answer);
+
+  protected speakSentence(): void {
+    const { before, answer, after } = this.current();
+    this.tts.speak(`${before} ${answer} ${after}`);
+  }
 
   protected selectOption(option: string): void {
     if (this.answered()) {

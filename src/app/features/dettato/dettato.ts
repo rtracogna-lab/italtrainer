@@ -1,7 +1,7 @@
 import { Component, computed, inject, OnDestroy, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Tts } from '../../shared/tts';
-import { DETTATI, Dettato as DettatoText, LEVELS, paragraphs, plainText, splitIntoChunks } from './dettati';
+import { DETTATI, Dettato as DettatoText, DettatoLevel, LEVELS, paragraphs, plainText, splitIntoChunks } from './dettati';
 
 type Phase = 'preview' | 'dictation' | 'done';
 
@@ -9,13 +9,14 @@ type Phase = 'preview' | 'dictation' | 'done';
 const NORMAL_RATE = 1;
 const PAUSE_BETWEEN_READINGS_MS = 2000;
 const DICTATION_RATE = 0.7;
-// Tempo per scrivere un gruppo di parole: una base più un tanto a parola.
-const WRITING_BASE_MS = 2000;
-const WRITING_PER_WORD_MS = 1000;
-// Ogni gruppo viene letto prima di fila, poi, dopo una breve pausa, ripetuto
-// lentamente una parola alla volta per SLOW_REPEATS volte.
-const PAUSE_BEFORE_REPEAT_MS = 1000;
-const SLOW_REPEATS = 2;
+// Ogni gruppo viene letto prima di fila, poi ripetuto lentamente una parola
+// alla volta, con una pausa tra una lettura e l'altra. Quante ripetizioni e
+// quanta attesa prima del gruppo successivo dipende dal livello.
+const PAUSE_BETWEEN_DICTATIONS_MS = 2000;
+const PACING: Record<DettatoLevel, { slowRepeats: number; pauseAfterChunkMs: number }> = {
+  base: { slowRepeats: 2, pauseAfterChunkMs: 0 },
+  avanzato: { slowRepeats: 1, pauseAfterChunkMs: 3000 },
+};
 // Pausa tra una parola e l'altra nelle ripetizioni lente.
 const DICTATION_WORD_PAUSE_MS = 1000;
 
@@ -118,14 +119,15 @@ export class Dettato implements OnDestroy {
   private async playFrom(start: number): Promise<void> {
     const id = this.stop();
     const chunks = this.chunks();
+    const { slowRepeats, pauseAfterChunkMs } = PACING[this.selected()!.level];
     for (let index = start; index < chunks.length; index++) {
       this.chunkIndex.set(index);
       await this.tts.speak(chunks[index].spoken.join(' '), DICTATION_RATE);
       if (id !== this.run) {
         return;
       }
-      for (let repeat = 0; repeat < SLOW_REPEATS; repeat++) {
-        await delay(PAUSE_BEFORE_REPEAT_MS);
+      for (let repeat = 0; repeat < slowRepeats; repeat++) {
+        await delay(PAUSE_BETWEEN_DICTATIONS_MS);
         if (
           id !== this.run ||
           !(await this.speakWords(chunks[index].spoken, DICTATION_RATE, DICTATION_WORD_PAUSE_MS, id))
@@ -133,9 +135,11 @@ export class Dettato implements OnDestroy {
           return;
         }
       }
-      await delay(WRITING_BASE_MS + chunks[index].words * WRITING_PER_WORD_MS);
-      if (id !== this.run) {
-        return;
+      if (pauseAfterChunkMs > 0) {
+        await delay(pauseAfterChunkMs);
+        if (id !== this.run) {
+          return;
+        }
       }
     }
     this.phase.set('done');
