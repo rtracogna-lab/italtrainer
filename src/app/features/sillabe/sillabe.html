@@ -1,0 +1,65 @@
+<section class="challenge-view">
+  <a class="challenge-view__back" routerLink="/">← Torna alla scelta della sfida</a>
+  <h1 class="challenge-view__title">🧱 Costruisci con le sillabe</h1>
+
+  @if (!tts.supported) {
+    <p class="challenge-view__placeholder">
+      ⚠️ Questo browser non sa leggere ad alta voce: prova con Edge o Chrome.
+    </p>
+  }
+
+  @if (!isFinished()) {
+    <p class="progress">Parola {{ currentIndex() + 1 }} di {{ total }} · Punteggio: {{ score() }}</p>
+
+    <div class="exercise-card">
+      <p class="exercise-card__hint">Ascolta la parola e costruiscila toccando le sillabe giuste.</p>
+      <button type="button" class="speak-btn" aria-label="Ascolta la parola" (click)="speakWord()">🔊 Ascolta</button>
+
+      <div class="built" [class.built--correct]="checked() && isCorrect()" [class.built--wrong]="checked() && !isCorrect()">
+        @for (tile of builtTiles(); track tile.id; let i = $index) {
+          <button type="button" class="built__tile" [disabled]="checked()" (click)="removeTile(i)">{{ tile.text }}</button>
+        } @empty {
+          <span class="built__placeholder">···</span>
+        }
+      </div>
+
+      @if (!checked()) {
+        @if (firstWrong(); as wrong) {
+          <p class="feedback feedback--wrong">❌ "{{ wrong }}" non è giusto: riascolta e riprova!</p>
+        }
+        <div class="options">
+          @for (tile of current().tiles; track tile.id) {
+            <button type="button" class="option-btn" [disabled]="isUsed(tile)" (click)="addTile(tile)">
+              {{ tile.text }}
+            </button>
+          }
+        </div>
+        <button type="button" class="next-btn" [disabled]="built().length === 0 || builtWord() === firstWrong()" (click)="check()">
+          {{ firstWrong() ? 'Controlla di nuovo' : 'Controlla' }}
+        </button>
+      } @else {
+        <p class="feedback" [class.feedback--correct]="isCorrect()" [class.feedback--wrong]="!isCorrect()">
+          @if (isCorrect()) {
+            ✅ Bravo! È "{{ current().word }}".
+            @if (firstWrong()) {
+              Ce l'hai fatta al secondo tentativo.
+            }
+          } @else {
+            ❌ Hai scritto "{{ builtWord() }}", la parola giusta è "{{ current().word }}".
+          }
+        </p>
+        <button type="button" class="next-btn" (click)="next()">
+          {{ currentIndex() + 1 < total ? 'Prossima parola →' : 'Vedi il risultato' }}
+        </button>
+      }
+    </div>
+  } @else {
+    <div class="result-card">
+      <h2>Hai finito! 🎉</h2>
+      <p>Punteggio: {{ score() }} su {{ total }}</p>
+      <app-round-summary [words]="summary()">
+        <button type="button" class="next-btn" (click)="restart()">Ricomincia</button>
+      </app-round-summary>
+    </div>
+  }
+</section>

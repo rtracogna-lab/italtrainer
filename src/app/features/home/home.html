@@ -4,7 +4,7 @@
 
   <div class="home__grid">
     @for (challenge of challenges; track challenge.route) {
-      <a class="challenge-card" [routerLink]="challenge.route">
+      <a class="challenge-card" [class.challenge-card--highlight]="challenge.highlight" [routerLink]="challenge.route">
         <span class="challenge-card__icon">{{ challenge.icon }}</span>
         <h2 class="challenge-card__title">{{ challenge.title }}</h2>
         <p class="challenge-card__description">{{ challenge.description }}</p>

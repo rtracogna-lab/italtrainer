@@ -7,6 +7,8 @@ export interface SummaryWord {
   suffix: string;
   // Risposta data dal bambino durante il round.
   given: string;
+  // Spiegazione dell'errore al posto di "avevi scelto ...".
+  note?: string;
 }
 
 const SECONDS_PER_WORD = 30;

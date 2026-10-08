@@ -1,0 +1,75 @@
+<section class="challenge-view">
+  <a class="challenge-view__back" routerLink="/">← Torna alla scelta della sfida</a>
+  <h1 class="challenge-view__title">🔎 Lettera mancante</h1>
+
+  @if (!isFinished()) {
+    <p class="progress">Parola {{ currentIndex() + 1 }} di {{ total }} · Punteggio: {{ score() }}</p>
+
+    <div class="exercise-card">
+      <p class="exercise-card__hint">
+        @if (chosenGap() === null) {
+          Manca una lettera: tocca il punto dove va messa.
+        } @else if (!answered()) {
+          Giusto! Ora scegli la lettera che manca.
+        }
+      </p>
+      @if (tts.supported) {
+        <button type="button" class="speak-btn" aria-label="Ascolta la parola" (click)="speakWord()">🔊 Ascolta</button>
+      }
+
+      <p class="split-row missing-row">
+        @for (gap of gaps(); track gap; let last = $last) {
+          <button
+            type="button"
+            class="split-gap"
+            [class.split-gap--active]="chosenGap() === gap"
+            [class.split-gap--correct]="answered() && validGaps().has(gap) && chosenGap() === gap && isCorrect()"
+            [class.split-gap--wrong]="answered() && chosenGap() === gap && !isCorrect()"
+            [class.split-gap--missed]="answered() && validGaps().has(gap) && chosenGap() !== gap"
+            [disabled]="chosenGap() !== null"
+            (click)="chooseGap(gap)"
+            [attr.aria-label]="'manca una lettera qui'"
+          >
+            @if (chosenGap() === gap && chosenLetter()) {
+              {{ chosenLetter() }}
+            } @else if (answered() && validGaps().has(gap) && chosenGap() !== gap) {
+              {{ current().letter }}
+            }
+          </button>
+          @if (!last) {
+            <span class="split-letter">{{ current().shown[gap] }}</span>
+          }
+        }
+      </p>
+
+      @if (gapIsRight() && !answered()) {
+        <div class="options">
+          @for (option of current().options; track option) {
+            <button type="button" class="option-btn" (click)="chooseLetter(option)">{{ option }}</button>
+          }
+        </div>
+      }
+
+      @if (answered()) {
+        <p class="feedback" [class.feedback--correct]="isCorrect()" [class.feedback--wrong]="!isCorrect()">
+          @if (isCorrect()) {
+            ✅ Bravo! È "{{ current().word }}".
+          } @else {
+            ❌ La parola giusta è "{{ current().word }}": mancava la "{{ current().letter }}".
+          }
+        </p>
+        <button type="button" class="next-btn" (click)="next()">
+          {{ currentIndex() + 1 < total ? 'Prossima parola →' : 'Vedi il risultato' }}
+        </button>
+      }
+    </div>
+  } @else {
+    <div class="result-card">
+      <h2>Hai finito! 🎉</h2>
+      <p>Punteggio: {{ score() }} su {{ total }}</p>
+      <app-round-summary [words]="summary()">
+        <button type="button" class="next-btn" (click)="restart()">Ricomincia</button>
+      </app-round-summary>
+    </div>
+  }
+</section>

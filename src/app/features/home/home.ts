@@ -6,6 +6,8 @@ interface Challenge {
   description: string;
   icon: string;
   route: string;
+  // Messa in evidenza in fondo all'elenco, a tutta larghezza.
+  highlight?: boolean;
 }
 
 @Component({
@@ -59,10 +61,23 @@ export class Home {
       route: '/ce-cie',
     },
     {
+      title: 'Lettera mancante',
+      description: 'Trova dove manca una lettera e rimettila al suo posto.',
+      icon: '🔎',
+      route: '/lettera-mancante',
+    },
+    {
+      title: 'Costruisci con le sillabe',
+      description: 'Ascolta la parola e componila con le sillabe giuste, senza cadere nelle trappole.',
+      icon: '🧱',
+      route: '/sillabe',
+    },
+    {
       title: 'Dettato',
-      description: 'Ascolta il dettato e scrivilo sul foglio, una parte alla volta.',
+      description: 'La prova finale: ascolta il dettato e scrivilo sul foglio, una parte alla volta.',
       icon: '✏️',
       route: '/dettato',
+      highlight: true,
     },
   ];
 }

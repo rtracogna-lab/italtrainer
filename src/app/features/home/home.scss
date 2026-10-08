@@ -57,4 +57,24 @@
     color: #666;
     font-size: 0.9rem;
   }
+
+  // Il dettato: in fondo, a tutta larghezza e colorato.
+  &--highlight {
+    grid-column: 1 / -1;
+    border: 2px solid #2b3a67;
+    background: linear-gradient(135deg, #eef1fa, #fff6e5);
+
+    .challenge-card__icon {
+      font-size: 3rem;
+    }
+
+    .challenge-card__title {
+      font-size: 1.5rem;
+      color: #2b3a67;
+    }
+
+    .challenge-card__description {
+      color: #444;
+    }
+  }
 }

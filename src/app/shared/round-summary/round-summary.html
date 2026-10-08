@@ -9,7 +9,7 @@
           >{{ word.missing }}</span
         >{{ word.suffix }}
         @if (word.given !== word.missing) {
-          <span class="summary__given">(avevi scelto “{{ word.given }}”)</span>
+          <span class="summary__given">({{ word.note ?? 'avevi scelto “' + word.given + '”' }})</span>
         }
       </li>
     }

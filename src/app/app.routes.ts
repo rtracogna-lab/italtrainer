@@ -52,6 +52,17 @@ export const routes: Routes = [
     title: 'ItalTrainer - Dettato',
   },
   {
+    path: 'lettera-mancante',
+    loadComponent: () =>
+      import('./features/lettera-mancante/lettera-mancante').then((m) => m.LetteraMancante),
+    title: 'ItalTrainer - Lettera mancante',
+  },
+  {
+    path: 'sillabe',
+    loadComponent: () => import('./features/sillabe/sillabe').then((m) => m.Sillabe),
+    title: 'ItalTrainer - Costruisci con le sillabe',
+  },
+  {
     path: '**',
     redirectTo: '',
   },

@@ -1,0 +1,17 @@
+// I punti tra le lettere sono più larghi che in "Spezza le parole", così si
+// toccano bene anche dal tablet, e mostrano la lettera inserita.
+.missing-row .split-gap {
+  width: 0.9rem;
+  font: inherit;
+  color: inherit;
+  line-height: 1;
+
+  &--active,
+  &--missed {
+    width: 1.4rem;
+  }
+
+  &--missed {
+    color: #b26a00;
+  }
+}
