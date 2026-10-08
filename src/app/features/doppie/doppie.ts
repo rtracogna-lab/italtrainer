@@ -44,6 +44,7 @@ const DOUBLE_LETTER_WORDS: DoppieWord[] = [
   { clue: '👠', prefix: 'ta', missing: 'cc', suffix: 'o', options: ['c', 'cc', 'ss', 'zz'] },
   { clue: '🦃', prefix: 'ta', missing: 'cc', suffix: 'hino', options: ['c', 'cc', 'pp', 'nn'] },
   { clue: '⚔️', prefix: 'a', missing: 'tt', suffix: 'acco', options: ['t', 'tt', 'ss', 'nn'] },
+  { clue: '😋', prefix: 'buoni', missing: 'ss', suffix: 'imo', options: ['s', 'ss', 'nn', 'mm'] },
 ];
 
 // Parole in cui NON ci va la doppia: allenano a non raddoppiare sempre.

@@ -69,11 +69,29 @@ const HO_O_SENTENCES: HannoAnnoSentence[] = [
   { before: 'Ci vediamo oggi', after: 'domani?', answer: 'o', options: HO_O_OPTIONS },
 ];
 
+// "c'è" (ci + è: qualcosa si trova lì) contro "ce" (davanti a lo, la, l', ne:
+// "ce l'ho", "ce la faccio", "ce ne sono").
+const CE_OPTIONS = ["c'è", 'ce'];
+
+const CE_SENTENCES: HannoAnnoSentence[] = [
+  { before: 'Sul tavolo', after: 'una torta.', answer: "c'è", options: CE_OPTIONS },
+  { before: 'Oggi', after: 'il sole.', answer: "c'è", options: CE_OPTIONS },
+  { before: 'Nel giardino', after: 'un grande albero.', answer: "c'è", options: CE_OPTIONS },
+  { before: 'Chi', after: 'alla porta?', answer: "c'è", options: CE_OPTIONS },
+  { before: 'Non', after: 'più latte nel frigo.', answer: "c'è", options: CE_OPTIONS },
+  { before: 'Hai la matita? Sì,', after: "l'ho nello zaino.", answer: 'ce', options: CE_OPTIONS },
+  { before: 'Non', after: 'la faccio più, sono stanco!', answer: 'ce', options: CE_OPTIONS },
+  { before: 'La maestra', after: "l'ha spiegato ieri.", answer: 'ce', options: CE_OPTIONS },
+  { before: 'Quante caramelle!', after: 'ne sono tantissime.', answer: 'ce', options: CE_OPTIONS },
+  { before: 'Se mi aiuti,', after: 'la facciamo in tempo.', answer: 'ce', options: CE_OPTIONS },
+];
+
 const SENTENCES: HannoAnnoSentence[] = [
   ...HANNO_ANNO_SENTENCES,
   ...HA_A_SENTENCES,
   ...E_SENTENCES,
   ...HO_O_SENTENCES,
+  ...CE_SENTENCES,
 ];
 const QUESTIONS_PER_ROUND = 10;
 

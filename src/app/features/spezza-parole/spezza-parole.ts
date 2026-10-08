@@ -30,6 +30,15 @@ const PHRASES: SplitPhrase[] = [
   { clue: '🎉', text: 'domani è festa' },
   { clue: '❄️', text: 'oggi fa freddo' },
   { clue: '🍰', text: 'la torta è buona' },
+  // Frasi con paroline (ne, ce, lo, gli, te...) che spesso si attaccano.
+  { clue: '🍕', text: 'tutti ne vogliono una fetta' },
+  { clue: '🍬', text: 'ce ne sono tante' },
+  { clue: '🤷', text: 'non lo so' },
+  { clue: '😘', text: 'gli do un bacio' },
+  { clue: '🍪', text: 'ne voglio ancora' },
+  { clue: '🤝', text: 'te lo prometto' },
+  { clue: '🎁', text: 'me lo regali' },
+  { clue: '🏫', text: 'ci vado domani' },
 ];
 
 function buildRoundItem(phrase: SplitPhrase): RoundItem {
