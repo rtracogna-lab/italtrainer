@@ -59,4 +59,28 @@ describe('HannoAnno', () => {
     expect(fixture.nativeElement.querySelector('.dictation-start')).toBeNull();
     expect(fixture.nativeElement.textContent).toContain('Ricomincia');
   });
+
+  it('should show a timed score at the end and keep the best one as a record', () => {
+    vi.useFakeTimers();
+    try {
+      localStorage.removeItem('italtrainer.hanno-anno.record');
+      fixture = TestBed.createComponent(HannoAnno);
+      const c = fixture.componentInstance as any;
+      for (let i = 0; i < c.total; i++) {
+        vi.advanceTimersByTime(2000);
+        const { answer, options } = c.current();
+        c.selectOption(i === 0 ? options.find((o: string) => o !== answer) : answer);
+        c.next();
+      }
+      fixture.detectChanges();
+
+      // 9 giuste (900) + bonus 9 × 40 (360) − 1 errore (100).
+      expect(c.finalScore().total).toBe(1160);
+      expect(fixture.nativeElement.textContent).toContain('1160 punti');
+      expect(fixture.nativeElement.textContent).toContain('Nuovo record');
+      expect(localStorage.getItem('italtrainer.hanno-anno.record')).toBe('1160');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });

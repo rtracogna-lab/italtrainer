@@ -45,7 +45,32 @@
   } @else {
     <div class="result-card">
       <h2>Hai finito! 🎉</h2>
-      <p>Punteggio: {{ score() }} su {{ total }}</p>
+      <p>Risposte giuste: {{ score() }} su {{ total }} · Tempo: {{ finalScore().totalSeconds }} secondi</p>
+
+      @let points = finalScore();
+      <div class="score-card">
+        <p class="score-card__total">⭐ {{ points.total }} punti</p>
+        @if (isNewRecord()) {
+          <p class="score-card__record score-card__record--new">🏆 Nuovo record!</p>
+        } @else if (record() > 0) {
+          <p class="score-card__record">Record: {{ record() }} punti</p>
+        }
+        <table class="score-card__details">
+          <tr>
+            <td>✅ Risposte giuste ({{ points.correct }} × 100)</td>
+            <td>+{{ points.basePoints }}</td>
+          </tr>
+          <tr>
+            <td>⚡ Bonus velocità</td>
+            <td>+{{ points.speedBonus }}</td>
+          </tr>
+          <tr>
+            <td>❌ Errori ({{ points.mistakes }} × 100)</td>
+            <td>−{{ points.penalty }}</td>
+          </tr>
+        </table>
+        <p class="score-card__hint">Più rispondi in fretta, più punti prendi. Ma attenzione: ogni errore ti toglie 100 punti!</p>
+      </div>
       <app-round-summary [words]="summary()" [dictation]="false">
         <button type="button" class="next-btn" (click)="restart()">Ricomincia</button>
       </app-round-summary>
