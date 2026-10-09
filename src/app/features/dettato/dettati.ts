@@ -4,6 +4,9 @@ export interface Dettato {
   title: string;
   level: DettatoLevel;
   text: string;
+  // Alla fine di ogni frase dice "Ora rileggo la frase, controlla." e
+  // rilegge la frase appena dettata.
+  rereadSentences?: boolean;
 }
 
 export const LEVELS: { id: DettatoLevel; label: string }[] = [
@@ -58,6 +61,17 @@ export const DETTATI: Dettato[] = [
       'Il portiere si tuffa per parare il pallone. L’arbitro fischia / se c’è un fallo. // ' +
       'La squadra migliore vince la partita. Giocare insieme insegna a rispettare le regole.',
   },
+  {
+    title: 'La mia partita',
+    level: 'avanzato',
+    rereadSentences: true,
+    text:
+      'Oggi vado a giocare a calcio con il Valnatisone / ma prima dovrò fare i compiti. ' +
+      'Sono un centrocampista dai piedi buoni / che gioca davanti alla difesa. ' +
+      'Magari segnerò un goal / e festeggerò con una capriola. ' +
+      'Il mister ci chiede sempre / di passare la palla ai compagni. ' +
+      'Dopo la partita / mangerò una pizza con tutta la squadra.',
+  },
 ];
 
 export interface DictationChunk {
@@ -103,6 +117,24 @@ export function plainText(text: string): string {
 // Il testo diviso nelle righe segnate con " // ".
 export function paragraphs(text: string): string[] {
   return text.split(NEW_LINE).map(plainText).filter(Boolean);
+}
+
+const SENTENCE_END = /[.!?]$/;
+
+// Se il gruppo all'indice dato chiude una frase, restituisce tutta la frase
+// (dall'inizio, anche se è divisa in più gruppi); altrimenti null.
+export function sentenceEndingAt(chunks: DictationChunk[], index: number): string | null {
+  if (!SENTENCE_END.test(chunks[index].text)) {
+    return null;
+  }
+  let start = index;
+  while (start > 0 && !SENTENCE_END.test(chunks[start - 1].text)) {
+    start--;
+  }
+  return chunks
+    .slice(start, index + 1)
+    .map((chunk) => chunk.text)
+    .join(' ');
 }
 
 const TARGET_WORDS = 3;

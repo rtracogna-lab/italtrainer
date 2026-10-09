@@ -28,7 +28,7 @@
           </div>
         }
         @case ('dictation') {
-          <p class="dettato__status">{{ paused() ? '⏸️ In pausa' : '✍️ Scrivi sul foglio…' }}</p>
+          <p class="dettato__status">{{ paused() ? '⏸️ In pausa' : rereading() ? '🔎 Rileggo: controlla quello che hai scritto…' : '✍️ Scrivi sul foglio…' }}</p>
           <p class="exercise-card__hint">Parte {{ chunkIndex() + 1 }} di {{ chunks().length }}</p>
           <div class="dettato__bar">
             <div class="dettato__bar-fill" [style.width.%]="progress()"></div>

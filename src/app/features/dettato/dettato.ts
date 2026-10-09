@@ -1,7 +1,16 @@
 import { Component, computed, inject, OnDestroy, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Tts } from '../../shared/tts';
-import { DETTATI, Dettato as DettatoText, DettatoLevel, LEVELS, paragraphs, plainText, splitIntoChunks } from './dettati';
+import {
+  DETTATI,
+  Dettato as DettatoText,
+  DettatoLevel,
+  LEVELS,
+  paragraphs,
+  plainText,
+  sentenceEndingAt,
+  splitIntoChunks,
+} from './dettati';
 
 type Phase = 'preview' | 'dictation' | 'done';
 
@@ -17,6 +26,9 @@ const PACING: Record<DettatoLevel, { slowRepeats: number; pauseAfterChunkMs: num
   base: { slowRepeats: 3, pauseAfterChunkMs: 0 },
   avanzato: { slowRepeats: 1, pauseAfterChunkMs: 3000 },
 };
+// Rilettura di ogni frase per controllare (solo nei dettati con rereadSentences).
+const REREAD_INTRO = 'Ora rileggo la frase, controlla.';
+const REREAD_RATE = 0.8;
 // Pausa tra una parola e l'altra nelle ripetizioni lente.
 const DICTATION_WORD_PAUSE_MS = 1000;
 
@@ -41,6 +53,8 @@ export class Dettato implements OnDestroy {
   protected readonly listening = signal(false);
   protected readonly chunkIndex = signal(0);
   protected readonly paused = signal(false);
+  // Rilettura dell'ultima frase dettata.
+  protected readonly rereading = signal(false);
 
   protected readonly text = computed(() => plainText(this.selected()?.text ?? ''));
   protected readonly paragraphs = computed(() => paragraphs(this.selected()?.text ?? ''));
@@ -146,8 +160,33 @@ export class Dettato implements OnDestroy {
           return;
         }
       }
+      const sentence = this.selected()!.rereadSentences ? sentenceEndingAt(chunks, index) : null;
+      if (sentence && !(await this.reread(sentence, id))) {
+        return;
+      }
     }
     this.phase.set('done');
+  }
+
+  // Annuncia la rilettura e rilegge la frase appena dettata.
+  // Restituisce false se nel frattempo è partita un'altra azione.
+  private async reread(sentence: string, id: number): Promise<boolean> {
+    this.rereading.set(true);
+    await this.tts.speak(REREAD_INTRO, NORMAL_RATE);
+    if (id === this.run) {
+      await delay(PAUSE_BETWEEN_DICTATIONS_MS);
+    }
+    if (id === this.run) {
+      await this.tts.speak(sentence, REREAD_RATE);
+    }
+    if (id === this.run) {
+      await delay(PAUSE_BETWEEN_DICTATIONS_MS);
+    }
+    if (id !== this.run) {
+      return false;
+    }
+    this.rereading.set(false);
+    return true;
   }
 
   // Legge le parole una alla volta, con una pausa tra l'una e l'altra.
@@ -173,6 +212,7 @@ export class Dettato implements OnDestroy {
     this.tts.cancel();
     this.listening.set(false);
     this.paused.set(false);
+    this.rereading.set(false);
     return ++this.run;
   }
 }

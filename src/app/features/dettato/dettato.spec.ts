@@ -155,4 +155,22 @@ describe('Dettato', () => {
     await vi.advanceTimersByTimeAsync(1);
     expect(spoken.at(-1)).toBe('molto divertenti punto');
   });
+
+  it('should announce and reread each sentence after dictating it when rereadSentences is set', async () => {
+    const dettato = DETTATI.find((item) => item.rereadSentences)!;
+    click(dettato.title);
+    await vi.advanceTimersByTimeAsync(60_000);
+    spoken = [];
+
+    click('Dettatura');
+    await vi.advanceTimersByTimeAsync(600_000);
+    fixture.detectChanges();
+    const rereads = spoken.flatMap((text, index) =>
+      text === 'Ora rileggo la frase, controlla.' ? [spoken[index + 1]] : [],
+    );
+    expect(rereads[0]).toBe('Oggi vado a giocare a calcio con il Valnatisone ma prima dovrò fare i compiti.');
+    expect(rereads.at(-1)).toBe('Dopo la partita mangerò una pizza con tutta la squadra.');
+    expect(rereads.length).toBe(5);
+    expect(el('.dettato__text').textContent).toContain('Valnatisone');
+  });
 });

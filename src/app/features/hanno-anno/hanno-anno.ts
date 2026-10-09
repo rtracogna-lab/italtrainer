@@ -26,6 +26,14 @@ const HANNO_ANNO_SENTENCES: HannoAnnoSentence[] = [
   { before: 'Ogni', after: 'festeggiamo il mio compleanno.', answer: 'anno', options: HANNO_ANNO_OPTIONS },
   { before: 'I miei nonni', after: 'una casa al mare.', answer: 'hanno', options: HANNO_ANNO_OPTIONS },
   { before: 'Fra un', after: 'sarò più alto.', answer: 'anno', options: HANNO_ANNO_OPTIONS },
+  { before: 'I miei amici', after: 'una bicicletta nuova.', answer: 'hanno', options: HANNO_ANNO_OPTIONS },
+  { before: "Quest'", after: 'ho conosciuto tanti amici.', answer: 'anno', options: HANNO_ANNO_OPTIONS },
+  { before: 'Le maestre', after: 'corretto i compiti.', answer: 'hanno', options: HANNO_ANNO_OPTIONS },
+  { before: 'Il mio cane ha un', after: 'e mezzo.', answer: 'anno', options: HANNO_ANNO_OPTIONS },
+  { before: 'I gatti', after: 'paura dei cani.', answer: 'hanno', options: HANNO_ANNO_OPTIONS },
+  { before: "Il primo giorno dell'", after: 'è il primo gennaio.', answer: 'anno', options: HANNO_ANNO_OPTIONS },
+  { before: 'Che cosa', after: 'fatto i tuoi compagni?', answer: 'hanno', options: HANNO_ANNO_OPTIONS },
+  { before: 'Mia sorella ha un', after: 'più di me.', answer: 'anno', options: HANNO_ANNO_OPTIONS },
 ];
 
 const HA_A_SENTENCES: HannoAnnoSentence[] = [
@@ -55,6 +63,28 @@ const E_SENTENCES: HannoAnnoSentence[] = [
   { before: 'Ho un cane', after: 'due gatti.', answer: 'e', options: E_OPTIONS },
   { before: 'La scuola', after: 'chiusa la domenica.', answer: 'è', options: E_OPTIONS },
   { before: 'Prendo la penna', after: 'il quaderno.', answer: 'e', options: E_OPTIONS },
+  // Coppie con "è" ed "e" nella stessa frase: una volta manca l'una, una
+  // volta l'altra.
+  { before: 'Il gelato', after: 'buono e fresco.', answer: 'è', options: E_OPTIONS },
+  { before: 'Il gelato è buono', after: 'fresco.', answer: 'e', options: E_OPTIONS },
+  { before: 'Il mare', after: 'calmo e blu.', answer: 'è', options: E_OPTIONS },
+  { before: 'Il gatto è bianco', after: 'nero.', answer: 'e', options: E_OPTIONS },
+  { before: 'Il compito', after: 'facile e veloce.', answer: 'è', options: E_OPTIONS },
+  { before: 'Marco è stanco', after: 'ha sonno.', answer: 'e', options: E_OPTIONS },
+  { before: 'Mio fratello', after: 'più alto di me.', answer: 'è', options: E_OPTIONS },
+  { before: 'Dove', after: 'il mio zaino?', answer: 'è', options: E_OPTIONS },
+  { before: 'La pizza', after: 'pronta, venite a tavola!', answer: 'è', options: E_OPTIONS },
+  { before: 'Oggi la maestra', after: 'contenta di noi.', answer: 'è', options: E_OPTIONS },
+  { before: 'Il pallone', after: 'sotto il letto.', answer: 'è', options: E_OPTIONS },
+  { before: 'Mio papà', after: 'un bravo cuoco.', answer: 'è', options: E_OPTIONS },
+  { before: 'Gioco a calcio', after: 'a pallavolo.', answer: 'e', options: E_OPTIONS },
+  { before: 'La mamma', after: 'il papà sono al lavoro.', answer: 'e', options: E_OPTIONS },
+  { before: 'Mi lavo i denti', after: 'vado a letto.', answer: 'e', options: E_OPTIONS },
+  { before: 'Il cane abbaia', after: 'scodinzola.', answer: 'e', options: E_OPTIONS },
+  { before: 'Ho letto un libro', after: 'ho fatto un disegno.', answer: 'e', options: E_OPTIONS },
+  { before: 'Apro la finestra', after: 'guardo fuori.', answer: 'e', options: E_OPTIONS },
+  { before: 'Oggi piove', after: 'fa freddo.', answer: 'e', options: E_OPTIONS },
+  { before: 'Il nonno', after: 'in giardino con il cane.', answer: 'è', options: E_OPTIONS },
 ];
 
 const HO_O_SENTENCES: HannoAnnoSentence[] = [
