@@ -57,7 +57,7 @@ const SINGLE_LETTER_WORDS: DoppieWord[] = [
   { clue: '✋', prefix: 'ma', missing: 'n', suffix: 'o', options: ['n', 'nn', 'q', 'l'] },
 ];
 
-const WORDS: DoppieWord[] = [...DOUBLE_LETTER_WORDS, ...SINGLE_LETTER_WORDS];
+export const WORDS: DoppieWord[] = [...DOUBLE_LETTER_WORDS, ...SINGLE_LETTER_WORDS];
 const QUESTIONS_PER_ROUND = 10;
 
 function pickRound(): DoppieWord[] {

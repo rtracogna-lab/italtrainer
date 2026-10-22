@@ -117,7 +117,7 @@ const CE_SENTENCES: HannoAnnoSentence[] = [
   { before: 'Se mi aiuti,', after: 'la facciamo in tempo.', answer: 'ce', options: CE_OPTIONS },
 ];
 
-const SENTENCES: HannoAnnoSentence[] = [
+export const SENTENCES: HannoAnnoSentence[] = [
   ...HANNO_ANNO_SENTENCES,
   ...HA_A_SENTENCES,
   ...E_SENTENCES,

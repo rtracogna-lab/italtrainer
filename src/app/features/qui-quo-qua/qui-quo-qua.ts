@@ -9,11 +9,11 @@ interface QuCuWord {
   suffix: string;
 }
 
-const OPTIONS = ['qu', 'cu', 'cqu'];
+export const OPTIONS = ['qu', 'cu', 'cqu'];
 
 // Parole che allenano la scelta tra "qu", "cu" e "cqu" (l'eccezione di
 // "acqua" e derivati). Le opzioni sono sempre le stesse tre per ogni parola.
-const WORDS: QuCuWord[] = [
+export const WORDS: QuCuWord[] = [
   { clue: '⬜', prefix: '', missing: 'qu', suffix: 'adrato' },
   { clue: '📓', prefix: '', missing: 'qu', suffix: 'aderno' },
   { clue: '⏰', prefix: '', missing: 'qu', suffix: 'ando' },

@@ -73,6 +73,12 @@ export class Home {
       route: '/sillabe',
     },
     {
+      title: 'La partita',
+      description: 'Due tempi di domande da tutte le sfide: rispondi giusto e in fretta per fare gol!',
+      icon: '⚽',
+      route: '/partita',
+    },
+    {
       title: 'Dettato',
       description: 'La prova finale: ascolta il dettato e scrivilo sul foglio, una parte alla volta.',
       icon: '✏️',

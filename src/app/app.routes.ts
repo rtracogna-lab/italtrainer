@@ -63,6 +63,11 @@ export const routes: Routes = [
     title: 'ItalTrainer - Costruisci con le sillabe',
   },
   {
+    path: 'partita',
+    loadComponent: () => import('./features/partita/partita').then((m) => m.Partita),
+    title: 'ItalTrainer - La partita',
+  },
+  {
     path: '**',
     redirectTo: '',
   },

@@ -19,7 +19,7 @@ interface CeCieWord {
 }
 
 // Le opzioni dipendono dalla parola: "ce/cie", "sce/scie" oppure "ge/gie".
-const OPTIONS: Record<CeCieSyllable, CeCieSyllable[]> = {
+export const OPTIONS: Record<CeCieSyllable, CeCieSyllable[]> = {
   ce: ['ce', 'cie'],
   cie: ['ce', 'cie'],
   sce: ['sce', 'scie'],
@@ -45,7 +45,7 @@ const IGIENE_TIP = '"Igiene" e i suoi derivati si scrivono con la "i".';
 // maggior parte dei casi si scrive senza "i": le parole con la "i" sono
 // eccezioni da ricordare (cielo, scienza, igiene...) oppure plurali di parole
 // in -cia/-gia.
-const WORDS: CeCieWord[] = [
+export const WORDS: CeCieWord[] = [
   // ce / cie
   { clue: '☁️', hint: 'Sopra di noi, azzurro', prefix: '', missing: 'cie', suffix: 'lo', tip: '"Cielo" si scrive con la "i".' },
   { clue: '🤫', hint: 'Io nascondo un segreto: io lo ...', prefix: '', missing: 'ce', suffix: 'lo', tip: '"Celo" viene da "celare" (nascondere): senza "i". Non confonderlo con "cielo"!' },
