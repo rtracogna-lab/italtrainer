@@ -8,21 +8,25 @@ import {
   LEVELS,
   paragraphs,
   plainText,
+  prepareDettato,
   sentenceEndingAt,
   splitIntoChunks,
 } from './dettati';
 
 type Phase = 'preview' | 'dictation' | 'done';
 
-// Lettura iniziale: il testo intero viene letto due volte a velocità normale.
+// Lettura iniziale: il testo intero viene letto una volta a velocità normale.
+// Negli elenchi di parole si legge una riga alla volta, con una pausa.
 const NORMAL_RATE = 1;
-const PAUSE_BETWEEN_READINGS_MS = 2000;
+const PAUSE_BETWEEN_LINES_MS = 1500;
 const DICTATION_RATE = 0.7;
 // Ogni gruppo viene letto prima di fila, poi ripetuto lentamente una parola
 // alla volta, con una pausa tra una lettura e l'altra. Quante ripetizioni e
 // quanta attesa prima del gruppo successivo dipende dal livello.
 const PAUSE_BETWEEN_DICTATIONS_MS = 2000;
 const PACING: Record<DettatoLevel, { slowRepeats: number; pauseAfterChunkMs: number }> = {
+  // Una parola alla volta: una ripetizione e poi il tempo per scriverla.
+  parole: { slowRepeats: 1, pauseAfterChunkMs: 3000 },
   base: { slowRepeats: 3, pauseAfterChunkMs: 0 },
   avanzato: { slowRepeats: 1, pauseAfterChunkMs: 3000 },
 };
@@ -49,8 +53,9 @@ export class Dettato implements OnDestroy {
 
   protected readonly selected = signal<DettatoText | null>(null);
   protected readonly phase = signal<Phase>('preview');
-  // Lettura iniziale del testo intero (due volte).
+  // Lettura iniziale del testo intero, avviata con il pulsante.
   protected readonly listening = signal(false);
+  protected readonly listened = signal(false);
   protected readonly chunkIndex = signal(0);
   protected readonly paused = signal(false);
   // Rilettura dell'ultima frase dettata.
@@ -60,7 +65,7 @@ export class Dettato implements OnDestroy {
   protected readonly paragraphs = computed(() => paragraphs(this.selected()?.text ?? ''));
   protected readonly chunks = computed(() => {
     const dettato = this.selected();
-    return dettato ? splitIntoChunks(dettato.text) : [];
+    return dettato ? splitIntoChunks(dettato.text, !dettato.wordRows) : [];
   });
   protected readonly progress = computed(() => ((this.chunkIndex() + 1) / this.chunks().length) * 100);
 
@@ -69,9 +74,15 @@ export class Dettato implements OnDestroy {
   private run = 0;
 
   protected choose(dettato: DettatoText): void {
-    this.selected.set(dettato);
+    this.stop();
+    this.selected.set(prepareDettato(dettato));
     this.phase.set('preview');
-    this.listen();
+    this.listened.set(false);
+  }
+
+  // Negli elenchi di parole pesca altre righe a caso.
+  protected otherWords(): void {
+    this.choose(this.selected()!);
   }
 
   protected backToList(): void {
@@ -86,16 +97,21 @@ export class Dettato implements OnDestroy {
     }
     const id = this.stop();
     this.listening.set(true);
-    await this.tts.speak(text, NORMAL_RATE);
-    if (id === this.run) {
-      await delay(PAUSE_BETWEEN_READINGS_MS);
+    this.listened.set(true);
+    const lines = this.selected()!.wordRows ? this.paragraphs() : [text];
+    for (let index = 0; index < lines.length; index++) {
+      if (index > 0) {
+        await delay(PAUSE_BETWEEN_LINES_MS);
+        if (id !== this.run) {
+          return;
+        }
+      }
+      await this.tts.speak(lines[index], NORMAL_RATE);
+      if (id !== this.run) {
+        return;
+      }
     }
-    if (id === this.run) {
-      await this.tts.speak(text, NORMAL_RATE);
-    }
-    if (id === this.run) {
-      this.listening.set(false);
-    }
+    this.listening.set(false);
   }
 
   protected startDictation(): void {

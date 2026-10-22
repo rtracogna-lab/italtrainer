@@ -14,16 +14,25 @@
 
       @switch (phase()) {
         @case ('preview') {
-          <div class="dettato__text">
+          <div class="dettato__text" [class.dettato__text--words]="dettato.wordRows">
             @for (paragraph of paragraphs(); track $index) {
               <p>{{ paragraph }}</p>
             }
           </div>
           <p class="exercise-card__hint">
-            {{ listening() ? '🔊 Ascolta bene il dettato…' : 'Quando sei pronto, prendi il foglio e premi "Dettatura".' }}
+            @if (listening()) {
+              🔊 Ascolta bene il dettato…
+            } @else if (listened()) {
+              Quando sei pronto, prendi il foglio e premi "Dettatura".
+            } @else {
+              Premi "Ascolta" per sentire il dettato intero, oppure "Dettatura" per iniziare a scrivere.
+            }
           </p>
           <div class="dettato__actions">
-            <button type="button" class="speak-btn" (click)="listen()">🔊 Riascolta</button>
+            <button type="button" class="speak-btn" (click)="listen()">🔊 {{ listened() ? 'Riascolta' : 'Ascolta' }}</button>
+            @if (dettato.wordRows) {
+              <button type="button" class="speak-btn" (click)="otherWords()">🔀 Altre parole</button>
+            }
             <button type="button" class="next-btn" (click)="startDictation()">🗣️ Dettatura</button>
           </div>
         }
@@ -47,7 +56,7 @@
         }
         @case ('done') {
           <p class="feedback feedback--correct">✅ Dettato finito! Ora controlla e datti un voto!</p>
-          <div class="dettato__text">
+          <div class="dettato__text" [class.dettato__text--words]="dettato.wordRows">
             @for (paragraph of paragraphs(); track $index) {
               <p>{{ paragraph }}</p>
             }

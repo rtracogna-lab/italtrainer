@@ -25,6 +25,12 @@
     p {
       margin: 0;
     }
+
+    // Elenco di parole: una riga per gruppo, parole ben distanziate.
+    &--words {
+      text-align: center;
+      word-spacing: 1.5em;
+    }
   }
 
   &__status {

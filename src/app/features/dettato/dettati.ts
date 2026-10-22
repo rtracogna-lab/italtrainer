@@ -1,4 +1,6 @@
-export type DettatoLevel = 'base' | 'avanzato';
+import { shuffle } from '../../shared/shuffle';
+
+export type DettatoLevel = 'parole' | 'base' | 'avanzato';
 
 export interface Dettato {
   title: string;
@@ -7,9 +9,31 @@ export interface Dettato {
   // Alla fine di ogni frase dice "Ora rileggo la frase, controlla." e
   // rilegge la frase appena dettata.
   rereadSentences?: boolean;
+  // Elenco di parole: righe tra cui ne vengono pescate WORD_LIST_ROWS a caso
+  // ogni volta (vedi prepareDettato). Ogni parola è dettata da sola, senza
+  // dire "a capo"; nella lettura iniziale c'è una pausa dopo ogni riga.
+  wordRows?: string[][];
+}
+
+export const WORD_LIST_ROWS = 5;
+
+// Per gli elenchi di parole sceglie le righe a caso e ne costruisce il testo:
+// " / " divide le parole e " // " le righe.
+export function prepareDettato(dettato: Dettato): Dettato {
+  if (!dettato.wordRows) {
+    return dettato;
+  }
+  const rows = shuffle(dettato.wordRows).slice(0, WORD_LIST_ROWS);
+  return { ...dettato, text: rows.map((row) => row.join(' / ')).join(' // ') };
+}
+
+// Il testo viene preparato al momento da prepareDettato.
+function wordList(title: string, rows: string): Dettato {
+  return { title, level: 'parole', text: '', wordRows: rows.split(',').map((row) => row.trim().split(' ')) };
 }
 
 export const LEVELS: { id: DettatoLevel; label: string }[] = [
+  { id: 'parole', label: 'Elenco di parole' },
   { id: 'base', label: 'Base' },
   { id: 'avanzato', label: 'Avanzato' },
 ];
@@ -72,6 +96,28 @@ export const DETTATI: Dettato[] = [
       'Il mister ci chiede sempre / di passare la palla ai compagni. ' +
       'Dopo la partita / mangerò una pizza con tutta la squadra.',
   },
+  wordList(
+    'Singolare e plurale',
+    'amico amici, sedia sedie, cuoco cuochi, gioco giochi, lago laghi, medico medici, ' +
+      'valigia valigie, arancia arance, camicia camicie, uovo uova, ciliegia ciliegie, ' +
+      'goccia gocce, spiaggia spiagge, mago maghi, banca banche, fungo funghi, bosco boschi, ' +
+      'parco parchi, tasca tasche, oca oche, farmacia farmacie, bugia bugie, guancia guance, ' +
+      'doccia docce, uomo uomini, dito dita, braccio braccia, città città, figlio figli, ' +
+      'foglio fogli, occhio occhi, famiglia famiglie, pesce pesci, mano mani, pacco pacchi',
+  ),
+  wordList(
+    'Verbi: oggi, ieri, domani',
+    'gioco giocavo giocherò, corro correvo correrò, mangio mangiavo mangerò, ' +
+      'cerco cercavo cercherò, pago pagavo pagherò, leggo leggevo leggerò, ' +
+      'dormo dormivo dormirò, scrivo scrivevo scriverò, faccio facevo farò, ' +
+      'cammino camminavo camminerò, nuoto nuotavo nuoterò, canto cantavo canterò, ' +
+      'salto saltavo salterò, parlo parlavo parlerò, vinco vincevo vincerò, ' +
+      'perdo perdevo perderò, prendo prendevo prenderò, apro aprivo aprirò, ' +
+      'finisco finivo finirò, capisco capivo capirò, vado andavo andrò, vengo venivo verrò, ' +
+      'bevo bevevo berrò, vedo vedevo vedrò, sto stavo starò, ho avevo avrò, sono ero sarò, ' +
+      'comincio cominciavo comincerò, lascio lasciavo lascerò, spiego spiegavo spiegherò, ' +
+      'navigo navigavo navigherò',
+  ),
 ];
 
 export interface DictationChunk {
@@ -142,8 +188,9 @@ const MAX_WORDS = TARGET_WORDS + 3;
 
 // Divide il testo in gruppi di 3 parole circa, spezzando sempre sulla
 // punteggiatura, mai subito dopo un articolo o una preposizione e senza
-// lasciare una parola da sola prima della punteggiatura.
-export function splitIntoChunks(text: string): DictationChunk[] {
+// lasciare una parola da sola prima della punteggiatura. Con sayNewLine
+// false il " // " va solo a capo nel testo, senza dire "a capo".
+export function splitIntoChunks(text: string, sayNewLine = true): DictationChunk[] {
   const chunks: DictationChunk[] = [];
   let words: string[] = [];
 
@@ -167,6 +214,9 @@ export function splitIntoChunks(text: string): DictationChunk[] {
     }
     if (token === NEW_LINE) {
       flush();
+      if (!sayNewLine) {
+        return;
+      }
       // "a capo" si aggiunge alla fine del gruppo appena dettato.
       const spoken = chunks.at(-1)?.spoken;
       if (spoken?.at(-1) === PUNCTUATION['.']) {

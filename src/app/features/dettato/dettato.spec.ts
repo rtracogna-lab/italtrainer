@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { Tts } from '../../shared/tts';
 import { Dettato } from './dettato';
-import { DETTATI, paragraphs, plainText, splitIntoChunks } from './dettati';
+import { DETTATI, paragraphs, plainText, prepareDettato, splitIntoChunks, WORD_LIST_ROWS } from './dettati';
 
 describe('splitIntoChunks', () => {
   it('should split on punctuation and never right after an article or preposition', () => {
@@ -71,16 +71,22 @@ describe('Dettato', () => {
   const buttons = (): HTMLButtonElement[] => Array.from(fixture.nativeElement.querySelectorAll('button'));
   const click = (label: string) => buttons().find((button) => button.textContent!.includes(label))!.click();
 
-  it('should read the whole text twice, with a pause in between', async () => {
+  it('should read the whole text once, only on request', async () => {
     const { title, text } = DETTATI[1];
     click(title);
-    await vi.advanceTimersByTimeAsync(1000);
-    expect(spoken).toEqual([text]);
+    await vi.advanceTimersByTimeAsync(5000);
+    expect(spoken).toEqual([]);
 
-    await vi.advanceTimersByTimeAsync(1000);
     fixture.detectChanges();
-    expect(spoken).toEqual([text, text]);
+    click('Ascolta');
+    await vi.advanceTimersByTimeAsync(5000);
+    fixture.detectChanges();
+    expect(spoken).toEqual([text]);
     expect(el('.dettato__text').textContent).toContain('nonna');
+
+    click('Riascolta');
+    await vi.advanceTimersByTimeAsync(0);
+    expect(spoken).toEqual([text, text]);
   });
 
   it('should dictate word by word, repeat each chunk, and support pause, repeat and restart', async () => {
@@ -154,6 +160,50 @@ describe('Dettato', () => {
     expect(spoken.length).toBe(4);
     await vi.advanceTimersByTimeAsync(1);
     expect(spoken.at(-1)).toBe('molto divertenti punto');
+  });
+
+  it('should read word lists line by line, then dictate one word at a time without "a capo"', async () => {
+    const list = DETTATI.find((dettato) => dettato.level === 'parole')!;
+    click(list.title);
+    fixture.detectChanges();
+    const lines = Array.from(el('.dettato__text').querySelectorAll('p') as NodeListOf<HTMLElement>).map(
+      (p) => p.textContent!,
+    );
+    expect(lines.length).toBe(WORD_LIST_ROWS);
+    const [first, second] = lines.map((line) => line.split(' '));
+
+    click('Ascolta');
+    await vi.advanceTimersByTimeAsync(1499);
+    expect(spoken).toEqual([lines[0]]);
+    await vi.advanceTimersByTimeAsync(1);
+    expect(spoken).toEqual([lines[0], lines[1]]);
+    spoken = [];
+
+    click('Dettatura');
+    await vi.advanceTimersByTimeAsync(2000);
+    expect(spoken).toEqual([first[0], first[0]]);
+
+    await vi.advanceTimersByTimeAsync(2999);
+    expect(spoken.length).toBe(2);
+    await vi.advanceTimersByTimeAsync(1);
+    expect(spoken.at(-1)).toBe(first[1]);
+    await vi.advanceTimersByTimeAsync(5000 * (first.length - 1));
+    expect(spoken.at(-1)).toBe(second[0]);
+  });
+
+  it('should pick different random rows for word lists', () => {
+    const list = DETTATI.find((dettato) => dettato.wordRows)!;
+    const rows = new Set(list.wordRows!.map((row) => row.join(' ')));
+    const picks = new Set<string>();
+    for (let i = 0; i < 20; i++) {
+      const lines = paragraphs(prepareDettato(list).text);
+      expect(lines.length).toBe(WORD_LIST_ROWS);
+      lines.forEach((line) => {
+        expect(rows.has(line)).toBe(true);
+        picks.add(line);
+      });
+    }
+    expect(picks.size).toBeGreaterThan(WORD_LIST_ROWS);
   });
 
   it('should announce and reread each sentence after dictating it when rereadSentences is set', async () => {
