@@ -26,9 +26,15 @@ export class Home {
     },
     {
       title: 'Hanno / Anno',
-      description: `Impara a distinguere "ha/a", "hanno/anno", "ho/o", "è/e" e "c'è/ce".`,
+      description: `Impara a distinguere "ha/a", "hanno/anno", "hai/ai", "ho/o", "è/e", "c'è/ce", "l'ho/lo", "gliel'ho/glielo" e "ah/oh/ahi".`,
       icon: '📅',
       route: '/hanno-anno',
+    },
+    {
+      title: 'Giusto o sbagliato?',
+      description: 'Un minuto di tempo: decidi più in fretta che puoi se la frase è scritta giusta o sbagliata.',
+      icon: '⚡',
+      route: '/giusto-sbagliato',
     },
     {
       title: 'Parole Unite',

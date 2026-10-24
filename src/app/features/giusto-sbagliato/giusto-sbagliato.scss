@@ -1,0 +1,128 @@
+.game-bar {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 0 0.5rem;
+  font-weight: 700;
+  color: #2b3a67;
+
+  &__time--low {
+    color: #c62828;
+  }
+}
+
+.timer {
+  height: 8px;
+  margin: 0 0 1rem;
+  border-radius: 999px;
+  background: #e0e0e0;
+  overflow: hidden;
+
+  &__fill {
+    height: 100%;
+    background: #2b3a67;
+    transition: width 0.25s linear;
+  }
+}
+
+.verdict {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin: 0 0 1rem;
+
+  &__btn {
+    flex: 1;
+    max-width: 200px;
+    padding: 1rem;
+    font-size: 1.2rem;
+    font-weight: 700;
+    border-radius: 12px;
+    border: 2px solid;
+    cursor: pointer;
+    transition: transform 0.1s ease;
+
+    &:active {
+      transform: scale(0.96);
+    }
+
+    &--right {
+      border-color: #2e7d32;
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    &--wrong {
+      border-color: #c62828;
+      background: #fdecea;
+      color: #c62828;
+    }
+  }
+}
+
+.last {
+  min-height: 1.5em;
+  margin: 0;
+  font-weight: 600;
+
+  &--ok {
+    color: #2e7d32;
+  }
+
+  &--ko {
+    color: #c62828;
+  }
+}
+
+.score {
+  margin: 1rem auto 1.5rem;
+
+  &__total {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #2b3a67;
+  }
+
+  &__record {
+    margin: 0.25rem 0 0;
+    color: #666;
+
+    &--new {
+      font-weight: 700;
+      color: #e65100;
+    }
+  }
+}
+
+.review {
+  margin: 0 0 1.5rem;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+
+  li {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #eee;
+    line-height: 1.5;
+  }
+
+  &__wrong {
+    color: #c62828;
+    text-decoration: line-through;
+  }
+
+  &__word {
+    color: #2e7d32;
+  }
+
+  &__note {
+    color: #888;
+    font-size: 0.9rem;
+  }
+
+  &__tip {
+    display: block;
+    color: #666;
+    font-size: 0.9rem;
+  }
+}

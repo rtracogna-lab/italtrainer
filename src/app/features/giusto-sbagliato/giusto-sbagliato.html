@@ -1,0 +1,87 @@
+<section class="challenge-view">
+  <a class="challenge-view__back" routerLink="/">← Torna alla scelta della sfida</a>
+  <h1 class="challenge-view__title">⚡ Giusto o sbagliato?</h1>
+
+  @switch (phase()) {
+    @case ('start') {
+      <div class="exercise-card">
+        <p>Leggi la frase e decidi: è scritta <strong>giusta</strong> o <strong>sbagliata</strong>?</p>
+        <p>Hai {{ gameSeconds }} secondi per rispondere a più frasi che puoi.</p>
+        <p class="exercise-card__hint">✅ Ogni risposta giusta vale 1 punto, ma ogni errore te ne toglie 1: non tirare a indovinare!</p>
+        @if (record() > 0) {
+          <p class="exercise-card__hint">🏆 Record: {{ record() }} punti</p>
+        }
+        <button type="button" class="next-btn" (click)="start()">▶️ Via!</button>
+      </div>
+    }
+
+    @case ('gioco') {
+      <div class="game-bar">
+        <span class="game-bar__time" [class.game-bar__time--low]="secondsLeft() <= 10">⏱️ {{ secondsLeft() }} s</span>
+        <span>⭐ {{ points() }} punti</span>
+      </div>
+      <div class="timer">
+        <div class="timer__fill" [style.width.%]="(secondsLeft() / gameSeconds) * 100"></div>
+      </div>
+
+      <div class="exercise-card">
+        <p class="exercise-card__text">{{ text() }}</p>
+        <div class="verdict">
+          <button type="button" class="verdict__btn verdict__btn--right" (click)="answer(true)">✅ Giusta</button>
+          <button type="button" class="verdict__btn verdict__btn--wrong" (click)="answer(false)">❌ Sbagliata</button>
+        </div>
+
+        @if (last(); as result) {
+          <p class="last" [class.last--ok]="result.correct" [class.last--ko]="!result.correct">
+            @if (result.correct) {
+              👍 Esatto!
+            } @else if (result.card.isRight) {
+              😬 Era giusta: "{{ rightText(result.card) }}"
+            } @else {
+              😬 Era sbagliata, si scrive: "{{ rightText(result.card) }}"
+            }
+          </p>
+        }
+      </div>
+    }
+
+    @case ('fine') {
+      <div class="result-card">
+        <h2>⏰ Tempo scaduto!</h2>
+        <p>Risposte giuste: {{ rightCount() }} · Errori: {{ mistakes().length }}</p>
+        <div class="score">
+          <p class="score__total">⭐ {{ points() }} punti</p>
+          @if (isNewRecord()) {
+            <p class="score__record score__record--new">🏆 Nuovo record!</p>
+          } @else if (record() > 0) {
+            <p class="score__record">Record: {{ record() }} punti</p>
+          }
+        </div>
+
+        @if (mistakes().length > 0) {
+          <h3>Ripassa le frasi sbagliate</h3>
+          <ul class="review">
+            @for (result of mistakes(); track $index) {
+              @let split = parts(result.card);
+              <li>
+                @if (!result.card.isRight) {
+                  <span class="review__wrong">{{ shownText(result.card) }}</span>
+                  <br />
+                }
+                ✅ {{ split.prefix }}<strong class="review__word">{{ result.card.sentence.answer }}</strong>{{ split.suffix }}
+                <span class="review__note">
+                  {{ result.card.isRight ? '(era giusta, avevi detto sbagliata)' : '(era sbagliata, avevi detto giusta)' }}
+                </span>
+                <span class="review__tip">💡 {{ result.card.sentence.tip }}</span>
+              </li>
+            }
+          </ul>
+        } @else if (rightCount() > 0) {
+          <p>🎉 Nessun errore: perfetto!</p>
+        }
+
+        <button type="button" class="next-btn" (click)="start()">🔁 Gioca ancora</button>
+      </div>
+    }
+  }
+</section>

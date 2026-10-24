@@ -18,6 +18,12 @@ export const routes: Routes = [
     title: 'ItalTrainer - Hanno / Anno',
   },
   {
+    path: 'giusto-sbagliato',
+    loadComponent: () =>
+      import('./features/giusto-sbagliato/giusto-sbagliato').then((m) => m.GiustoSbagliato),
+    title: 'ItalTrainer - Giusto o sbagliato?',
+  },
+  {
     path: 'parole-unite',
     loadComponent: () =>
       import('./features/parole-unite/parole-unite').then((m) => m.ParoleUnite),
