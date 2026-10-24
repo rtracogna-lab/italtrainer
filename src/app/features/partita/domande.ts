@@ -1,6 +1,6 @@
 import { OPTIONS as CE_CIE_OPTIONS, WORDS as CE_CIE_WORDS } from '../ce-cie/ce-cie';
 import { WORDS as DOPPIE_WORDS } from '../doppie/doppie';
-import { SENTENCES as HANNO_ANNO_SENTENCES } from '../hanno-anno/hanno-anno';
+import { SENTENCES as HANNO_ANNO_SENTENCES, sentenceParts } from '../hanno-anno/frasi';
 import { OPTIONS as QU_CU_OPTIONS, WORDS as QU_CU_WORDS } from '../qui-quo-qua/qui-quo-qua';
 import { shuffle } from '../../shared/shuffle';
 
@@ -29,12 +29,11 @@ export const QUESTION_SOURCES: MatchQuestion[][] = [
     options: CE_CIE_OPTIONS[missing],
     tip,
   })),
-  // "Quest'" e "L'" vanno attaccati alla parola che segue.
-  HANNO_ANNO_SENTENCES.map(({ before, answer, after, options }) => ({
-    prefix: before.endsWith("'") ? before : before + ' ',
-    missing: answer,
-    suffix: ' ' + after,
-    options,
+  HANNO_ANNO_SENTENCES.map((sentence) => ({
+    ...sentenceParts(sentence),
+    missing: sentence.answer,
+    options: sentence.options,
+    tip: sentence.tip,
   })),
 ];
 

@@ -1,3 +1,31 @@
+// Scelta dell'argomento: cambiarlo fa ripartire il round.
+.topics {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 0 0 1.25rem;
+}
+
+.topic-btn {
+  padding: 0.35rem 0.8rem;
+  font-size: 0.95rem;
+  border-radius: 999px;
+  border: 2px solid #ccd3e0;
+  background: #fff;
+  cursor: pointer;
+
+  &:hover {
+    border-color: #2b3a67;
+  }
+
+  &--active {
+    border-color: #2b3a67;
+    background: #2b3a67;
+    color: #fff;
+  }
+}
+
 // Punteggio finale a tempo.
 .score-card {
   max-width: 420px;

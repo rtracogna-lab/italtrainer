@@ -28,7 +28,7 @@ describe('HannoAnno', () => {
     const c = component as any;
     c.sentences.set([{ before: 'Vuoi il gelato', after: 'la torta?', answer: 'o', options: ['ho', 'o'] }]);
     fixture.detectChanges();
-    const buttons: HTMLButtonElement[] = Array.from(fixture.nativeElement.querySelectorAll('button'));
+    const buttons: HTMLButtonElement[] = Array.from(fixture.nativeElement.querySelectorAll('.exercise-card button'));
     expect(buttons.map((b) => b.textContent!.trim())).toEqual(['🔊 Ascolta', 'ho', 'o']);
 
     buttons[0].click();
@@ -40,6 +40,31 @@ describe('HannoAnno', () => {
     c.sentences.set([{ before: "Quest'", after: 'andrò in terza.', answer: 'anno', options: ['hanno', 'anno'] }]);
     c.speakSentence();
     expect(spoken).toEqual(["Quest'anno andrò in terza."]);
+  });
+
+  it('should not put a space before punctuation or after an empty start', () => {
+    const c = component as any;
+    c.sentences.set([{ before: '', after: ', mi fa male la testa!', answer: 'Ahi', options: ['Ah', 'Oh', 'Ahi'] }]);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.exercise-card__text').textContent.trim()).toBe(
+      '···, mi fa male la testa!',
+    );
+    c.speakSentence();
+    expect(spoken).toEqual(['Ahi, mi fa male la testa!']);
+  });
+
+  it('should restart the round on the chosen topic and show its tip after answering', () => {
+    const c = component as any;
+    const button = Array.from(fixture.nativeElement.querySelectorAll('.topic-btn') as NodeListOf<HTMLButtonElement>).find(
+      (b) => b.textContent!.trim() === 'hai / ai',
+    )!;
+    button.click();
+    fixture.detectChanges();
+    expect(c.sentences().every((s: any) => s.options.map((o: string) => o.toLowerCase()).join() === 'hai,ai')).toBe(true);
+
+    c.selectOption(c.current().answer);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('avevi');
   });
 
   it('should show a recap of every sentence at the end of the round', () => {

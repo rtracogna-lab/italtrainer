@@ -2,6 +2,20 @@
   <a class="challenge-view__back" routerLink="/">← Torna alla scelta della sfida</a>
   <h1 class="challenge-view__title">📅 Hanno / Anno</h1>
 
+  <div class="topics" role="group" aria-label="Argomento">
+    @for (item of topics; track item.id) {
+      <button
+        type="button"
+        class="topic-btn"
+        [class.topic-btn--active]="item.id === topic()"
+        [attr.aria-pressed]="item.id === topic()"
+        (click)="chooseTopic(item.id)"
+      >
+        {{ item.label }}
+      </button>
+    }
+  </div>
+
   @if (!isFinished()) {
     <p class="progress">Frase {{ currentIndex() + 1 }} di {{ total }} · Punteggio: {{ score() }}</p>
 
@@ -10,8 +24,7 @@
         <button type="button" class="speak-btn" aria-label="Ascolta la frase" (click)="speakSentence()">🔊 Ascolta</button>
       }
       <p class="exercise-card__text">
-        {{ current().before }} <span class="exercise-card__blank">{{ selected() ?? '···' }}</span>
-        {{ current().after }}
+        {{ parts().prefix }}<span class="exercise-card__blank">{{ selected() ?? '···' }}</span>{{ parts().suffix }}
       </p>
 
       <div class="options">
@@ -37,6 +50,9 @@
             ❌ La risposta giusta è "{{ current().answer }}".
           }
         </p>
+        @if (current().tip; as tip) {
+          <p class="exercise-card__hint">💡 {{ tip }}</p>
+        }
         <button type="button" class="next-btn" (click)="next()">
           {{ currentIndex() + 1 < total ? 'Prossima frase →' : 'Vedi il risultato' }}
         </button>
