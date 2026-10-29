@@ -118,6 +118,11 @@
     color: #2e7d32;
   }
 
+  &--fermato {
+    font-size: 1.5rem;
+    color: #1565c0;
+  }
+
   &--parata {
     font-size: 1.2rem;
     color: #e65100;
@@ -126,6 +131,134 @@
   &--subito {
     font-size: 1.2rem;
     color: #c62828;
+  }
+}
+
+// Festa del gol: il pallone vola in porta, la rete trema e arriva il grido.
+.exercise-card--match {
+  position: relative;
+}
+
+// Contropiede: banner rosso che pulsa e scheda bordata di rosso.
+.counter-banner {
+  margin: 0.25rem 0 1rem;
+  padding: 0.6rem 1rem;
+  border-radius: 10px;
+  background: #c62828;
+  color: #fff;
+  font-weight: 600;
+  line-height: 1.4;
+  animation: pop 0.4s ease-out, counter-pulse 1s ease-in-out 0.4s infinite;
+}
+
+.exercise-card--counter {
+  box-shadow: 0 0 0 3px #c62828;
+}
+
+@keyframes counter-pulse {
+  50% {
+    background: #e53935;
+    transform: scale(1.02);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .counter-banner {
+    animation: none;
+  }
+}
+
+.goal-anim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: rgba(27, 94, 32, 0.92);
+  color: #fff;
+  animation: fade-in 0.2s ease-out;
+
+  &__field {
+    position: relative;
+    width: 220px;
+    height: 120px;
+  }
+
+  &__net {
+    position: absolute;
+    right: 0;
+    top: 0;
+    font-size: 6rem;
+    line-height: 1;
+    animation: net-shake 0.4s ease-in-out 0.8s 2;
+  }
+
+  &__ball {
+    position: absolute;
+    right: 2.2rem;
+    top: 2.2rem;
+    font-size: 2.2rem;
+    line-height: 1;
+    animation: ball-shot 0.8s cubic-bezier(0.3, 0.6, 0.4, 1) both;
+  }
+
+  &__cry {
+    margin: 1rem 0 0;
+    font-size: 2.4rem;
+    font-weight: 900;
+    letter-spacing: 0.05em;
+    text-shadow: 0 3px 0 #0d3311;
+    animation: pop 0.5s ease-out 0.8s both, cry-pulse 0.6s ease-in-out 1.3s 3;
+  }
+}
+
+// Dal basso a sinistra, con una parabola, fin dentro la porta.
+@keyframes ball-shot {
+  0% {
+    transform: translate(-170px, 70px) rotate(0deg) scale(1.4);
+  }
+  50% {
+    transform: translate(-80px, -30px) rotate(360deg) scale(1.1);
+  }
+  100% {
+    transform: translate(0, 0) rotate(720deg) scale(0.8);
+  }
+}
+
+@keyframes net-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(6px) rotate(3deg);
+  }
+  75% {
+    transform: translateX(-6px) rotate(-3deg);
+  }
+}
+
+@keyframes cry-pulse {
+  50% {
+    transform: scale(1.12);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .goal-anim,
+  .goal-anim__net,
+  .goal-anim__ball,
+  .goal-anim__cry {
+    animation: none;
   }
 }
 

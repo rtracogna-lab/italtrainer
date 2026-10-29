@@ -1,8 +1,19 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { Whistle } from '../../shared/fischio';
 import { Tts } from '../../shared/tts';
 import { pickMatchQuestions, QUESTION_SOURCES } from './domande';
-import { GOAL_PAUSE_MS, HALF_MINUTES, Partita, REAL_MS_PER_MINUTE, WRONG_PAUSE_MS } from './partita';
+import {
+  COUNTER_SAVED_PAUSE_MS,
+  FULL_TIME_WHISTLE,
+  GOAL_PAUSE_MS,
+  HALF_MINUTES,
+  HALF_TIME_WHISTLE,
+  KICK_OFF_WHISTLE,
+  Partita,
+  REAL_MS_PER_MINUTE,
+  GOAL_CRY,
+} from './partita';
 
 describe('pickMatchQuestions', () => {
   it('should mix questions from every challenge', () => {
@@ -25,18 +36,35 @@ describe('pickMatchQuestions', () => {
 describe('Partita', () => {
   let fixture: ComponentFixture<Partita>;
   let c: any;
+  let spoken: string[];
+  let whistles: number[][];
 
   beforeEach(async () => {
     vi.useFakeTimers();
+    spoken = [];
+    whistles = [];
     localStorage.clear();
     await TestBed.configureTestingModule({
       imports: [Partita],
-      providers: [provideRouter([]), { provide: Tts, useValue: { supported: false, speak: () => {}, cancel: () => {} } }],
+      providers: [
+        provideRouter([]),
+        {
+          provide: Tts,
+          useValue: {
+            supported: false,
+            speak: (text: string) => spoken.push(text),
+            cancel: () => {},
+          },
+        },
+        { provide: Whistle, useValue: { play: (blasts: number[]) => whistles.push(blasts) } },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(Partita);
     c = fixture.componentInstance;
     fixture.detectChanges();
+    // Nessun contropiede, se non nei test che lo chiedono.
+    c.random = () => 1;
   });
 
   afterEach(() => {
@@ -44,12 +72,88 @@ describe('Partita', () => {
     vi.useRealTimers();
   });
 
-  // Risponde e aspetta che arrivi la domanda seguente.
+  // Risponde e passa alla domanda seguente: dopo un errore premendo "Riprendi".
   function answer(right: boolean): void {
     const question = c.current();
-    c.selectOption(right ? question.missing : question.options.find((o: string) => o !== question.missing));
-    vi.advanceTimersByTime(GOAL_PAUSE_MS + WRONG_PAUSE_MS);
+    c.selectOption(
+      right ? question.missing : question.options.find((o: string) => o !== question.missing),
+    );
+    if (right) {
+      vi.advanceTimersByTime(GOAL_PAUSE_MS);
+    } else {
+      c.resume();
+    }
   }
+
+  it('should bring back an old mistake as a counterattack: wrong again means a goal', () => {
+    c.kickOff();
+    answer(false);
+    const mistake = c.mistakes()[0].question;
+    const text = (q: any) => q.prefix + q.missing + q.suffix;
+    // Troppo presto: la domanda sbagliata non torna subito.
+    c.random = () => 0;
+    answer(true);
+    answer(true);
+    expect(c.counter()).toBe(false);
+    answer(true);
+    expect(c.counter()).toBe(true);
+    expect(text(c.current())).toBe(text(mistake));
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('CONTROPIEDE');
+
+    // Sbagliata di nuovo: gol degli avversari e partita ferma.
+    const question = c.current();
+    c.selectOption(question.options.find((o: string) => o !== question.missing));
+    expect(c.goalsAgainst()).toBe(1);
+    expect(c.paused()).toBe(true);
+    c.resume();
+    expect(c.counter()).toBe(false);
+
+    // La volta dopo la rifà giusta: contropiede fermato e non torna più.
+    c.random = () => 1;
+    answer(true);
+    answer(true);
+    answer(true);
+    c.random = () => 0;
+    answer(true);
+    expect(c.counter()).toBe(true);
+    c.selectOption(c.current().missing);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Contropiede fermato');
+    vi.advanceTimersByTime(COUNTER_SAVED_PAUSE_MS);
+    expect(c.counter()).toBe(false);
+    expect(c.countersStopped()).toBe(1);
+    expect(c.counters()).toBe(2);
+    answer(true);
+    answer(true);
+    expect(c.counter()).toBe(false);
+  });
+
+  it('should stop the clock after a mistake until "Riprendi" is pressed', () => {
+    c.kickOff();
+    vi.advanceTimersByTime(5 * REAL_MS_PER_MINUTE);
+    const question = c.current();
+    c.selectOption(question.options.find((o: string) => o !== question.missing));
+    const minute = c.minute();
+
+    vi.advanceTimersByTime(60_000);
+    fixture.detectChanges();
+    expect(c.minute()).toBe(minute);
+    expect(c.current()).toBe(question);
+    const text = fixture.nativeElement.textContent;
+    expect(text).toContain('gioco fermo');
+    if (question.tip) {
+      expect(text).toContain(question.tip);
+    }
+
+    const resume = Array.from(
+      fixture.nativeElement.querySelectorAll('button') as NodeListOf<HTMLButtonElement>,
+    ).find((button) => button.textContent!.includes('Riprendi'))!;
+    resume.click();
+    expect(c.current()).not.toBe(question);
+    vi.advanceTimersByTime(REAL_MS_PER_MINUTE);
+    expect(c.minute()).toBeCloseTo(minute + 1, 1);
+  });
 
   it('should score after 5 right answers in a row and concede after 2 mistakes in a row', () => {
     c.kickOff();
@@ -74,7 +178,7 @@ describe('Partita', () => {
     expect(c.mistakes().length).toBe(3);
   });
 
-  it('should show the goal celebration until the next question', () => {
+  it('should show the goal celebration until the next question', async () => {
     c.kickOff();
     for (let i = 0; i < 4; i++) {
       answer(true);
@@ -82,9 +186,14 @@ describe('Partita', () => {
     const question = c.current();
     c.selectOption(question.missing);
     fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('GOOOL');
+    expect(fixture.nativeElement.querySelector('.goal-anim__cry').textContent).toContain(
+      'GO GO GO GOOOL',
+    );
+    expect(spoken).toEqual(['Gol!']);
 
-    vi.advanceTimersByTime(GOAL_PAUSE_MS);
+    // I "Gol!" arrivano uno alla volta, con una pausa, poi il "Goool" lungo.
+    await vi.advanceTimersByTimeAsync(GOAL_PAUSE_MS);
+    expect(spoken).toEqual(GOAL_CRY);
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).not.toContain('GOOOL');
     expect(c.current()).not.toBe(question);
@@ -112,5 +221,11 @@ describe('Partita', () => {
     const text = fixture.nativeElement.textContent;
     expect(text).toContain('1 – 0');
     expect(text).toContain('Hai vinto');
+    expect(whistles).toEqual([
+      KICK_OFF_WHISTLE,
+      HALF_TIME_WHISTLE,
+      KICK_OFF_WHISTLE,
+      FULL_TIME_WHISTLE,
+    ]);
   });
 });
