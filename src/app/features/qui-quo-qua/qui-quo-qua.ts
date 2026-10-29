@@ -35,6 +35,21 @@ export const WORDS: QuCuWord[] = [
   { clue: '📚', prefix: '', missing: 'cu', suffix: 'ltura' },
   { clue: '🍳', prefix: '', missing: 'cu', suffix: 'cina' },
   { clue: '🧐', prefix: '', missing: 'cu', suffix: 'rioso' },
+  { clue: '🌳', prefix: '', missing: 'qu', suffix: 'ercia' },
+  { clue: '1️⃣5️⃣', prefix: '', missing: 'qu', suffix: 'indici' },
+  { clue: '⚽', prefix: 's', missing: 'qu', suffix: 'adra' },
+  { clue: '🦈', prefix: 's', missing: 'qu', suffix: 'alo' },
+  { clue: '🦅', prefix: 'a', missing: 'qu', suffix: 'ila' },
+  { clue: '🧴', prefix: 'li', missing: 'qu', suffix: 'ido' },
+  { clue: '🤸', prefix: 'e', missing: 'qu', suffix: 'ilibrio' },
+  { clue: '🍲', prefix: '', missing: 'cu', suffix: 'ocere' },
+  { clue: '🌑', prefix: 's', missing: 'cu', suffix: 'ro' },
+  { clue: '🛋️', prefix: '', missing: 'cu', suffix: 'scino' },
+  { clue: '👦', prefix: '', missing: 'cu', suffix: 'gino' },
+  { clue: '🎧', prefix: '', missing: 'cu', suffix: 'ffia' },
+  { clue: '🎨', prefix: 'a', missing: 'cqu', suffix: 'erello' },
+  { clue: '🚿', prefix: 'scia', missing: 'cqu', suffix: 'are' },
+  { clue: '🏛️', prefix: 'a', missing: 'cqu', suffix: 'edotto' },
 ];
 
 const QUESTIONS_PER_ROUND = 10;

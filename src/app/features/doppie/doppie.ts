@@ -45,6 +45,24 @@ const DOUBLE_LETTER_WORDS: DoppieWord[] = [
   { clue: '🦃', prefix: 'ta', missing: 'cc', suffix: 'hino', options: ['c', 'cc', 'pp', 'nn'] },
   { clue: '⚔️', prefix: 'a', missing: 'tt', suffix: 'acco', options: ['t', 'tt', 'ss', 'nn'] },
   { clue: '😋', prefix: 'buoni', missing: 'ss', suffix: 'imo', options: ['s', 'ss', 'nn', 'mm'] },
+  { clue: '🍾', prefix: 'bo', missing: 'tt', suffix: 'iglia', options: ['t', 'tt', 'll', 'ss'] },
+  { clue: '🐊', prefix: 'co', missing: 'cc', suffix: 'odrillo', options: ['c', 'cc', 'tt', 'ss'] },
+  { clue: '🏹', prefix: 'fre', missing: 'cc', suffix: 'ia', options: ['c', 'cc', 'ss', 'zz'] },
+  { clue: '🥛', prefix: 'la', missing: 'tt', suffix: 'e', options: ['t', 'tt', 'ss', 'nn'] },
+  { clue: '🛏️', prefix: 'le', missing: 'tt', suffix: 'o', options: ['t', 'tt', 'ss', 'nn'] },
+  { clue: '🧱', prefix: 'ma', missing: 'tt', suffix: 'one', options: ['t', 'tt', 'ss', 'nn'] },
+  { clue: '👓', prefix: 'o', missing: 'cc', suffix: 'hiali', options: ['c', 'cc', 'ss', 'zz'] },
+  { clue: '🍗', prefix: 'po', missing: 'll', suffix: 'o', options: ['l', 'll', 'tt', 'nn'] },
+  { clue: '⭐', prefix: 'ste', missing: 'll', suffix: 'a', options: ['l', 'll', 'tt', 'nn'] },
+  { clue: '🌍', prefix: 'te', missing: 'rr', suffix: 'a', options: ['r', 'rr', 'tt', 'ss'] },
+  { clue: '💍', prefix: 'ane', missing: 'll', suffix: 'o', options: ['l', 'll', 'tt', 'nn'] },
+  { clue: '☕', prefix: 'ta', missing: 'zz', suffix: 'a', options: ['z', 'zz', 'ss', 'tt'] },
+  { clue: '🐄', prefix: 'mu', missing: 'cc', suffix: 'a', options: ['c', 'cc', 'ss', 'zz'] },
+  { clue: '🎃', prefix: 'zu', missing: 'cc', suffix: 'a', options: ['c', 'cc', 'ss', 'zz'] },
+  { clue: '🧸', prefix: 'orse', missing: 'tt', suffix: 'o', options: ['t', 'tt', 'ss', 'nn'] },
+  { clue: '✉️', prefix: 'le', missing: 'tt', suffix: 'era', options: ['t', 'tt', 'ss', 'nn'] },
+  { clue: '🦒', prefix: 'gira', missing: 'ff', suffix: 'a', options: ['f', 'ff', 'pp', 'tt'] },
+  { clue: '🎈', prefix: 'pa', missing: 'll', suffix: 'oncino', options: ['l', 'll', 'nn', 'tt'] },
 ];
 
 // Parole in cui NON ci va la doppia: allenano a non raddoppiare sempre.
@@ -55,6 +73,13 @@ const SINGLE_LETTER_WORDS: DoppieWord[] = [
   { clue: '🌙', prefix: 'lu', missing: 'n', suffix: 'a', options: ['n', 'nn', 'q', 'm'] },
   { clue: '☀️', prefix: 'so', missing: 'l', suffix: 'e', options: ['l', 'll', 'q', 'n'] },
   { clue: '✋', prefix: 'ma', missing: 'n', suffix: 'o', options: ['n', 'nn', 'q', 'l'] },
+  { clue: '⌚', prefix: 'oro', missing: 'l', suffix: 'ogio', options: ['l', 'll', 'r', 'n'] },
+  { clue: '🍦', prefix: 'ge', missing: 'l', suffix: 'ato', options: ['l', 'll', 'r', 'n'] },
+  { clue: '✏️', prefix: 'ma', missing: 't', suffix: 'ita', options: ['t', 'tt', 'd', 'l'] },
+  { clue: '🍓', prefix: 'fra', missing: 'g', suffix: 'ola', options: ['g', 'gg', 'c', 'l'] },
+  { clue: '🍋', prefix: 'li', missing: 'm', suffix: 'one', options: ['m', 'mm', 'n', 'l'] },
+  { clue: '🍌', prefix: 'ba', missing: 'n', suffix: 'ana', options: ['n', 'nn', 'm', 'l'] },
+  { clue: '🐢', prefix: 'tarta', missing: 'r', suffix: 'uga', options: ['r', 'rr', 'l', 'n'] },
 ];
 
 export const WORDS: DoppieWord[] = [...DOUBLE_LETTER_WORDS, ...SINGLE_LETTER_WORDS];
