@@ -3,6 +3,8 @@ import { WORDS as DOPPIE_WORDS } from '../doppie/doppie';
 import { GROUPS, sentenceParts } from '../hanno-anno/frasi';
 import { OPTIONS as QU_CU_OPTIONS, WORDS as QU_CU_WORDS } from '../qui-quo-qua/qui-quo-qua';
 import { shuffle } from '../../shared/shuffle';
+import { GHE_GHI_QUESTIONS } from './ghe-ghi';
+import { M_N_QUESTIONS } from './m-n';
 
 // Domanda della partita: la stessa forma per parole e frasi, così la partita
 // può mescolare le domande delle altre sfide.
@@ -31,6 +33,8 @@ export const QUESTION_SOURCES: MatchQuestion[][] = [
     options: CE_CIE_OPTIONS[missing],
     tip,
   })),
+  GHE_GHI_QUESTIONS,
+  M_N_QUESTIONS,
   // Le frasi con l'apostrofo (l'ho, gliel'ho...) sono le più difficili: hanno
   // una fonte tutta loro, così escono più spesso delle altre di Hanno/Anno.
   ...[
