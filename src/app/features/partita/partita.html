@@ -12,7 +12,7 @@
           Si comincia!
         }
         @case ('gioco') {
-          {{ half() }}° tempo · {{ minute() }}'
+          {{ half() }}° tempo · <strong>{{ clock() }}'</strong>
         }
         @case ('intervallo') {
           Intervallo
@@ -22,6 +22,11 @@
         }
       }
     </span>
+    @if (phase() === 'gioco') {
+      <div class="scoreboard__time">
+        <div class="scoreboard__time-fill" [style.width.%]="halfProgress()"></div>
+      </div>
+    }
   </div>
 
   @switch (phase()) {
@@ -29,33 +34,36 @@
       <div class="exercise-card">
         <p class="exercise-card__clue">🏟️</p>
         <h2 class="match-title">Oggi si gioca contro i {{ opponent().name }}!</h2>
-        <p>Due tempi da {{ actionsPerHalf }} azioni: ogni domanda è un tiro in porta.</p>
+        <p>
+          Due tempi da {{ halfMinutes }} minuti: la partita dura circa {{ realMinutes }} minuti veri.
+          Il cronometro non si ferma mai, quindi rispondi in fretta!
+        </p>
         <ul class="rules">
-          <li>⚽ Rispondi giusto entro {{ goalSeconds }} secondi: <strong>gol!</strong></li>
-          <li>🧤 Rispondi giusto ma troppo tardi: il portiere <strong>para</strong>.</li>
-          <li>😱 Sbagli: contropiede e <strong>gol degli avversari</strong>.</li>
+          <li>⚽ {{ streakForGoal }} risposte giuste di fila: <strong>gol!</strong></li>
+          <li>😱 {{ mistakesForGoal }} errori di fila: <strong>gol degli avversari</strong>.</li>
         </ul>
         <button type="button" class="next-btn" (click)="kickOff()">🏁 Fischio d'inizio!</button>
       </div>
     }
 
     @case ('gioco') {
-      <p class="progress">Azione {{ currentIndex() + 1 }} di {{ total }}</p>
+      <div class="streak" aria-label="Risposte giuste di fila">
+        @for (slot of streakSlots; track slot) {
+          <span class="streak__slot" [class.streak__slot--on]="slot < rightStreak()">⚽</span>
+        }
+        <span class="streak__goal">🥅</span>
+      </div>
+      <p class="streak__label" [class.streak__label--danger]="wrongStreak() > 0">
+        @if (wrongStreak() > 0) {
+          ⚠️ Attento: un altro errore e segnano loro!
+        } @else if (rightStreak() === 0) {
+          Fai {{ streakForGoal }} risposte giuste di fila per segnare!
+        } @else {
+          Ancora {{ streakForGoal - rightStreak() }} per il gol!
+        }
+      </p>
 
       <div class="exercise-card">
-        <div class="shot-clock" [class.shot-clock--late]="timeLeftPercent() === 0">
-          <div class="shot-clock__fill" [style.width.%]="answered() ? 0 : timeLeftPercent()"></div>
-        </div>
-        <p class="shot-clock__label">
-          @if (answered()) {
-            &nbsp;
-          } @else if (timeLeftPercent() > 0) {
-            ⚽ Tira prima che arrivi il portiere!
-          } @else {
-            🧤 Il portiere è pronto… rispondi comunque!
-          }
-        </p>
-
         @if (current().clue; as clue) {
           <p class="exercise-card__clue">{{ clue }}</p>
         }
@@ -86,36 +94,22 @@
           }
         </div>
 
-        @if (answered()) {
-          @switch (lastOutcome()) {
-            @case ('gol') {
-              <p class="shot-result shot-result--gol">⚽ GOOOL!</p>
-            }
-            @case ('parata') {
-              <p class="shot-result shot-result--parata">🧤 Parata! Era giusto, ma il portiere è arrivato in tempo.</p>
-            }
-            @case ('gol-subito') {
-              <p class="shot-result shot-result--subito">😱 Contropiede… gol dei {{ opponent().name }}!</p>
-            }
+        <div class="action-result">
+          @if (justScored() === 'noi') {
+            <p class="shot-result shot-result--gol">⚽ GOOOL!</p>
+          } @else if (justScored() === 'loro') {
+            <p class="shot-result shot-result--subito">😱 Gol dei {{ opponent().name }}!</p>
           }
-          @if (!isCorrect()) {
-            <p class="feedback feedback--wrong">
-              La risposta giusta è "{{ current().prefix }}{{ current().missing }}{{ current().suffix }}".
-            </p>
-          }
-          @if (current().tip; as tip) {
-            <p class="exercise-card__hint">💡 {{ tip }}</p>
-          }
-          <button type="button" class="next-btn" (click)="next()">
-            @if (currentIndex() + 1 === actionsPerHalf) {
-              Fine primo tempo
-            } @else if (currentIndex() + 1 === total) {
-              Fischio finale
+          @if (answered()) {
+            @if (isCorrect()) {
+              <p class="feedback feedback--correct">✅ Giusto!</p>
             } @else {
-              Prossima azione →
+              <p class="feedback feedback--wrong">
+                ❌ Si scrive "{{ current().prefix }}{{ current().missing }}{{ current().suffix }}".
+              </p>
             }
-          </button>
-        }
+          }
+        </div>
       </div>
     }
 
@@ -146,7 +140,10 @@
             Hai perso… la prossima la vinci tu! 💪
           }
         </h2>
-        <p>⚽ Gol: {{ goalsFor() }} · 🧤 Parate del portiere: {{ saves() }} · 😱 Gol subiti: {{ goalsAgainst() }}</p>
+        <p>
+          ✅ Risposte giuste: {{ rightAnswers() }} · ❌ Errori: {{ mistakes().length }} · 🔥 Serie migliore:
+          {{ bestStreak() }}
+        </p>
         @if (isNewRecord()) {
           <p class="match-record match-record--new">🏆 Nuovo record: {{ recordGoals() }} gol in una partita!</p>
         } @else if (recordGoals() > 0) {
@@ -158,18 +155,24 @@
 
         @if (goals().length > 0) {
           <ul class="goal-list">
-            @for (goal of goals(); track goal.minute) {
-              <li [class.goal-list__item--against]="goal.outcome === 'gol-subito'">
+            @for (goal of goals(); track $index) {
+              <li [class.goal-list__item--against]="goal.side === 'loro'">
                 {{ goal.minute }}' ⚽
-                {{ goal.outcome === 'gol' ? 'Gol tuo!' : 'Gol dei ' + opponent().name }}
+                {{ goal.side === 'noi' ? 'Gol tuo!' : 'Gol dei ' + opponent().name }}
               </li>
             }
           </ul>
         }
 
-        <app-round-summary [words]="summary()" [dictation]="false">
+        @if (mistakes().length > 0) {
+          <h3>Ripassa gli errori</h3>
+          <app-round-summary [words]="summary()" [dictation]="false">
+            <button type="button" class="next-btn" (click)="restart()">Nuova partita</button>
+          </app-round-summary>
+        } @else {
+          <p>🎉 Nessun errore in tutta la partita!</p>
           <button type="button" class="next-btn" (click)="restart()">Nuova partita</button>
-        </app-round-summary>
+        }
       </div>
     }
   }

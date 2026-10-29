@@ -1,6 +1,6 @@
 import { OPTIONS as CE_CIE_OPTIONS, WORDS as CE_CIE_WORDS } from '../ce-cie/ce-cie';
 import { WORDS as DOPPIE_WORDS } from '../doppie/doppie';
-import { SENTENCES as HANNO_ANNO_SENTENCES, sentenceParts } from '../hanno-anno/frasi';
+import { GROUPS, sentenceParts } from '../hanno-anno/frasi';
 import { OPTIONS as QU_CU_OPTIONS, WORDS as QU_CU_WORDS } from '../qui-quo-qua/qui-quo-qua';
 import { shuffle } from '../../shared/shuffle';
 
@@ -16,6 +16,8 @@ export interface MatchQuestion {
   tip?: string;
 }
 
+const APOSTROPHE_GROUPS = ['lo-lho', 'glielo'];
+
 // Una fonte per ogni sfida, per pescare domande in modo equilibrato.
 export const QUESTION_SOURCES: MatchQuestion[][] = [
   DOPPIE_WORDS.map(({ clue, prefix, missing, suffix, options }) => ({ clue, prefix, missing, suffix, options })),
@@ -29,12 +31,21 @@ export const QUESTION_SOURCES: MatchQuestion[][] = [
     options: CE_CIE_OPTIONS[missing],
     tip,
   })),
-  HANNO_ANNO_SENTENCES.map((sentence) => ({
-    ...sentenceParts(sentence),
-    missing: sentence.answer,
-    options: sentence.options,
-    tip: sentence.tip,
-  })),
+  // Le frasi con l'apostrofo (l'ho, gliel'ho...) sono le più difficili: hanno
+  // una fonte tutta loro, così escono più spesso delle altre di Hanno/Anno.
+  ...[
+    GROUPS.filter((group) => !APOSTROPHE_GROUPS.includes(group.id)),
+    ...APOSTROPHE_GROUPS.map((id) => GROUPS.filter((group) => group.id === id)),
+  ].map((groups) =>
+    groups
+      .flatMap((group) => group.sentences)
+      .map((sentence) => ({
+        ...sentenceParts(sentence),
+        missing: sentence.answer,
+        options: sentence.options,
+        tip: sentence.tip,
+      })),
+  ),
 ];
 
 export function pickMatchQuestions(count: number, sources = QUESTION_SOURCES): MatchQuestion[] {

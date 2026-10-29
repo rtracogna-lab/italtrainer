@@ -80,7 +80,7 @@ export class Home {
     },
     {
       title: 'La partita',
-      description: 'Due tempi di domande da tutte le sfide: rispondi giusto e in fretta per fare gol!',
+      description: '90 minuti di domande da tutte le sfide: 5 risposte giuste di fila e fai gol, 2 errori di fila e segnano loro!',
       icon: '⚽',
       route: '/partita',
     },

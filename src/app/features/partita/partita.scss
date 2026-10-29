@@ -34,8 +34,65 @@
   &__clock {
     grid-column: 1 / -1;
     font-size: 0.9rem;
-    opacity: 0.85;
+    font-variant-numeric: tabular-nums;
+    opacity: 0.9;
   }
+
+  // Quanto manca alla fine del tempo.
+  &__time {
+    grid-column: 1 / -1;
+    height: 6px;
+    border-radius: 999px;
+    background: #0d3311;
+    overflow: hidden;
+  }
+
+  &__time-fill {
+    height: 100%;
+    background: #a5d6a7;
+    transition: width 0.2s linear;
+  }
+}
+
+// Serie di risposte giuste verso il gol.
+.streak {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 1.6rem;
+
+  &__slot {
+    opacity: 0.2;
+    filter: grayscale(1);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+
+    &--on {
+      opacity: 1;
+      filter: none;
+      transform: scale(1.15);
+    }
+  }
+
+  &__goal {
+    margin-left: 0.5rem;
+  }
+
+  &__label {
+    margin: 0.25rem 0 1rem;
+    min-height: 1.2em;
+    font-weight: 600;
+    color: #555;
+
+    &--danger {
+      color: #c62828;
+    }
+  }
+}
+
+// Spazio fisso per l'esito, così i pulsanti non saltano.
+.action-result {
+  min-height: 3.5rem;
 }
 
 .match-title {
@@ -49,31 +106,6 @@
   list-style: none;
   text-align: left;
   line-height: 1.8;
-}
-
-// Barra del tiro: si svuota mentre il portiere si prepara.
-.shot-clock {
-  height: 10px;
-  border-radius: 999px;
-  background: #e0e0e0;
-  overflow: hidden;
-
-  &__fill {
-    height: 100%;
-    background: #43a047;
-    transition: width 0.1s linear;
-  }
-
-  &__label {
-    margin: 0.4rem 0 1rem;
-    min-height: 1.2em;
-    font-size: 0.9rem;
-    color: #555;
-  }
-
-  &--late {
-    background: #ffe0b2;
-  }
 }
 
 .shot-result {
