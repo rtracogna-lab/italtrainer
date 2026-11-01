@@ -20,19 +20,25 @@ export interface MatchQuestion {
 
 const APOSTROPHE_GROUPS = ['lo-lho', 'glielo'];
 
+const CE_CIE_QUESTIONS: MatchQuestion[] = CE_CIE_WORDS.map(({ clue, hint, prefix, missing, suffix, tip }) => ({
+  clue,
+  hint,
+  prefix,
+  missing,
+  suffix,
+  options: CE_CIE_OPTIONS[missing],
+  tip,
+}));
+// I plurali di -cia/-gia ("Una camicia, due ...") sono i più sbagliati: hanno
+// una fonte tutta loro, così escono più spesso.
+const isPlural = (question: MatchQuestion) => question.hint!.includes(', due ');
+
 // Una fonte per ogni sfida, per pescare domande in modo equilibrato.
 export const QUESTION_SOURCES: MatchQuestion[][] = [
   DOPPIE_WORDS.map(({ clue, prefix, missing, suffix, options }) => ({ clue, prefix, missing, suffix, options })),
   QU_CU_WORDS.map(({ clue, prefix, missing, suffix }) => ({ clue, prefix, missing, suffix, options: QU_CU_OPTIONS })),
-  CE_CIE_WORDS.map(({ clue, hint, prefix, missing, suffix, tip }) => ({
-    clue,
-    hint,
-    prefix,
-    missing,
-    suffix,
-    options: CE_CIE_OPTIONS[missing],
-    tip,
-  })),
+  CE_CIE_QUESTIONS.filter((question) => !isPlural(question)),
+  CE_CIE_QUESTIONS.filter(isPlural),
   GHE_GHI_QUESTIONS,
   M_N_QUESTIONS,
   // Le frasi con l'apostrofo (l'ho, gliel'ho...) sono le più difficili: hanno
