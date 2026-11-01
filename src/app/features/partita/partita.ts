@@ -40,11 +40,11 @@ export const COUNTER_CHANCE = 0.2;
 export const COUNTER_MIN_AGE = 3;
 export const COUNTER_SAVED_PAUSE_MS = 1500;
 // Tiro a rasoio: ogni tanto, a caso, chi ha almeno una risposta giusta nella
-// serie può provarlo. Due risposte giuste entro 6 secondi: gol diretto. Se
+// serie può provarlo. Due risposte giuste entro 10 secondi: gol diretto. Se
 // sbaglia o finisce il tempo, perde una risposta della serie.
 export const RAZOR_CHANCE = 0.12;
 export const RAZOR_HITS = 2;
-export const RAZOR_SECONDS = 6;
+export const RAZOR_SECONDS = 10;
 export const RAZOR_MISSED_PAUSE_MS = 1800;
 const QUESTIONS_PER_BATCH = 20;
 const WINS_KEY = 'italtrainer.partita.vittorie';

@@ -142,7 +142,7 @@ describe('Partita', () => {
     expect(c.razor()).toBe('offer');
   }
 
-  it('should score straight away with 2 right answers in 6 seconds', () => {
+  it('should score straight away with 2 right answers in 10 seconds', () => {
     offerRazor();
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Tiro a rasoio');
