@@ -39,6 +39,13 @@ export const FULL_TIME_WHISTLE = [250, 250, 1000];
 export const COUNTER_CHANCE = 0.2;
 export const COUNTER_MIN_AGE = 3;
 export const COUNTER_SAVED_PAUSE_MS = 1500;
+// Tiro a rasoio: ogni tanto, a caso, chi ha almeno una risposta giusta nella
+// serie può provarlo. Due risposte giuste entro 6 secondi: gol diretto. Se
+// sbaglia o finisce il tempo, perde una risposta della serie.
+export const RAZOR_CHANCE = 0.12;
+export const RAZOR_HITS = 2;
+export const RAZOR_SECONDS = 6;
+export const RAZOR_MISSED_PAUSE_MS = 1800;
 const QUESTIONS_PER_BATCH = 20;
 const WINS_KEY = 'italtrainer.partita.vittorie';
 const RECORD_GOALS_KEY = 'italtrainer.partita.record-gol';
@@ -133,11 +140,24 @@ export class Partita implements OnDestroy {
   protected readonly counter = signal(false);
   protected readonly counters = signal(0);
   protected readonly countersStopped = signal(0);
+  // Tiro a rasoio: proposto, in corso, oppure niente.
+  protected readonly razor = signal<'off' | 'offer' | 'shooting'>('off');
+  protected readonly razorHits = signal(0);
+  protected readonly razorLeft = signal(RAZOR_SECONDS);
+  // Tiro appena fallito, per mostrare il perché.
+  protected readonly razorMissed = signal<'tempo' | 'errore' | null>(null);
+  protected readonly razorTries = signal(0);
+  protected readonly razorGoals = signal(0);
   // Gol appena segnato (da una parte o dall'altra), per festeggiarlo.
   protected readonly justScored = signal<Side | null>(null);
   protected readonly wins = signal(readNumber(WINS_KEY));
   protected readonly recordGoals = signal(readNumber(RECORD_GOALS_KEY));
   protected readonly isNewRecord = signal(false);
+
+  protected readonly razorHitsNeeded = RAZOR_HITS;
+  protected readonly razorSecondsTotal = RAZOR_SECONDS;
+  protected readonly razorSeconds = computed(() => Math.ceil(this.razorLeft()));
+  protected readonly razorPercent = computed(() => (this.razorLeft() / RAZOR_SECONDS) * 100);
 
   protected readonly current = computed(() => this.questions()[this.currentIndex()]);
   protected readonly isCorrect = computed(() => this.selected() === this.current().missing);
@@ -159,12 +179,15 @@ export class Partita implements OnDestroy {
   private halfStart = 0;
   private pausedAt = 0;
   private answeredCount = 0;
-  // Sostituibile nei test per decidere quando scatta il contropiede.
+  // Sostituibili nei test per decidere quando scattano contropiede e tiro a rasoio.
   private random = Math.random;
+  private razorRandom = Math.random;
   // Ogni gol incrementa il contatore: un grido ancora in corso di un gol
   // precedente se ne accorge e si ferma.
   private cry = 0;
+  private razorEndsAt = 0;
   private ticker: ReturnType<typeof setInterval> | null = null;
+  private razorTicker: ReturnType<typeof setInterval> | null = null;
   private advance: ReturnType<typeof setTimeout> | null = null;
 
   ngOnDestroy(): void {
@@ -197,14 +220,38 @@ export class Partita implements OnDestroy {
     this.nextQuestion();
   }
 
+  protected acceptRazor(): void {
+    if (this.razor() !== 'offer') {
+      return;
+    }
+    this.razor.set('shooting');
+    this.razorTries.update((value) => value + 1);
+    this.razorHits.set(0);
+    this.razorLeft.set(RAZOR_SECONDS);
+    this.razorEndsAt = Date.now() + RAZOR_SECONDS * 1000;
+    this.razorTicker = setInterval(() => {
+      const left = Math.max(0, (this.razorEndsAt - Date.now()) / 1000);
+      this.razorLeft.set(left);
+      if (left === 0) {
+        this.missRazor('tempo');
+      }
+    }, 100);
+  }
+
+  protected declineRazor(): void {
+    this.razor.set('off');
+  }
+
   protected selectOption(option: string): void {
-    if (this.answered() || this.phase() !== 'gioco') {
+    if (this.answered() || this.phase() !== 'gioco' || this.razor() === 'offer') {
       return;
     }
     this.selected.set(option);
     this.answered.set(true);
     this.answeredCount++;
-    if (this.counter()) {
+    if (this.razor() === 'shooting') {
+      this.answerRazor(option);
+    } else if (this.counter()) {
       this.answerCounter(option === this.current().missing);
     } else if (option === this.current().missing) {
       this.rightAnswers.update((value) => value + 1);
@@ -245,8 +292,54 @@ export class Partita implements OnDestroy {
     this.mistakes.set([]);
     this.counters.set(0);
     this.countersStopped.set(0);
+    this.razor.set('off');
+    this.razorTries.set(0);
+    this.razorGoals.set(0);
     this.answeredCount = 0;
     this.isNewRecord.set(false);
+  }
+
+  // Tiro a rasoio: le risposte giuste si susseguono senza pause; alla seconda
+  // è gol. Un errore fa fallire il tiro e ferma la partita come gli altri.
+  private answerRazor(option: string): void {
+    if (option !== this.current().missing) {
+      this.mistakes.update((list) => [
+        ...list,
+        { question: this.current(), given: option, at: this.answeredCount, redeemed: false },
+      ]);
+      this.missRazor('errore');
+      this.pause();
+      return;
+    }
+    this.rightAnswers.update((value) => value + 1);
+    this.razorHits.update((value) => value + 1);
+    if (this.razorHits() < RAZOR_HITS) {
+      this.nextQuestion();
+      return;
+    }
+    this.stopRazor();
+    this.razorGoals.update((value) => value + 1);
+    this.advance = setTimeout(() => this.nextQuestion(), this.score('noi'));
+  }
+
+  // Tiro fallito: si perde una risposta della serie.
+  private missRazor(reason: 'tempo' | 'errore'): void {
+    this.stopRazor();
+    this.razorMissed.set(reason);
+    this.rightStreak.update((value) => Math.max(0, value - 1));
+    if (reason === 'tempo') {
+      // La domanda resta a metà: dopo il messaggio si passa alla prossima.
+      this.answered.set(true);
+      this.advance = setTimeout(() => this.nextQuestion(), RAZOR_MISSED_PAUSE_MS);
+    }
+  }
+
+  private stopRazor(): void {
+    if (this.razorTicker !== null) {
+      clearInterval(this.razorTicker);
+      this.razorTicker = null;
+    }
+    this.razor.set('off');
   }
 
   // Contropiede: se si risponde giusto è fermato e la domanda non torna più,
@@ -311,13 +404,23 @@ export class Partita implements OnDestroy {
     this.ticker = setInterval(() => this.tick(), 200);
   }
 
-  private nextQuestion(): void {
+  // `events` false: niente contropiede né tiro a rasoio (es. a fine tempo).
+  private nextQuestion(events = true): void {
     this.advance = null;
-    // Niente contropiede subito dopo un gol, né due di fila.
-    const calm = this.justScored() === null && !this.counter();
+    // Niente contropiede o tiro a rasoio subito dopo un gol, un contropiede o
+    // un tiro fallito, né durante un tiro a rasoio.
+    const calm =
+      events &&
+      this.justScored() === null &&
+      !this.counter() &&
+      this.razorMissed() === null &&
+      this.razor() === 'off';
     this.resetAction();
     const index = this.currentIndex() + 1;
     const counterQuestion = calm ? this.pickCounterQuestion() : null;
+    if (calm && !counterQuestion && this.rightStreak() >= 1 && this.razorRandom() < RAZOR_CHANCE) {
+      this.razor.set('offer');
+    }
     if (counterQuestion) {
       this.questions.update((list) => [
         ...list.slice(0, index),
@@ -347,10 +450,11 @@ export class Partita implements OnDestroy {
   private endHalf(): void {
     this.stopTimers();
     if (this.answered()) {
-      this.nextQuestion();
+      this.nextQuestion(false);
     }
     this.resetAction();
     this.resetStreaks();
+    this.razor.set('off');
     if (this.half() === 1) {
       this.half.set(2);
       this.phase.set('intervallo');
@@ -379,6 +483,7 @@ export class Partita implements OnDestroy {
     this.answered.set(false);
     this.justScored.set(null);
     this.counter.set(false);
+    this.razorMissed.set(null);
   }
 
   private resetStreaks(): void {
@@ -394,6 +499,10 @@ export class Partita implements OnDestroy {
     if (this.advance !== null) {
       clearTimeout(this.advance);
       this.advance = null;
+    }
+    if (this.razorTicker !== null) {
+      clearInterval(this.razorTicker);
+      this.razorTicker = null;
     }
   }
 }

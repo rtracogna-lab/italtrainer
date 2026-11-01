@@ -151,6 +151,72 @@
   animation: pop 0.4s ease-out, counter-pulse 1s ease-in-out 0.4s infinite;
 }
 
+// Tiro a rasoio: la proposta copre la domanda, poi una barra dei 6 secondi.
+.razor-offer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  border-radius: 12px;
+  background: rgba(255, 248, 225, 0.97);
+  box-shadow: inset 0 0 0 3px #f9a825;
+  animation: pop 0.35s ease-out;
+
+  p {
+    margin: 0 0 0.5rem;
+  }
+
+  &__title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #e65100;
+  }
+
+  &__risk {
+    font-size: 0.9rem;
+    color: #666;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+
+    .speak-btn {
+      margin: 0;
+    }
+  }
+}
+
+.razor-bar {
+  margin: 0.25rem 0 1rem;
+
+  &__text {
+    margin: 0 0 0.35rem;
+    font-weight: 700;
+    color: #e65100;
+  }
+
+  &__track {
+    height: 10px;
+    border-radius: 999px;
+    background: #ffe0b2;
+    overflow: hidden;
+  }
+
+  &__fill {
+    height: 100%;
+    background: #f57c00;
+    transition: width 0.1s linear;
+  }
+}
+
 .exercise-card--counter {
   box-shadow: 0 0 0 3px #c62828;
 }

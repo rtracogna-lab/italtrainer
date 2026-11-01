@@ -49,6 +49,11 @@
             ⚡ Ogni tanto gli avversari partono in <strong>contropiede</strong>: torna una domanda
             che avevi sbagliato. Se sbagli ancora, segnano loro!
           </li>
+          <li>
+            🎯 Ogni tanto puoi provare il <strong>tiro a rasoio</strong>:
+            {{ razorHitsNeeded }} risposte giuste in {{ razorSecondsTotal }} secondi e fai gol
+            subito, ma se non ce la fai perdi una risposta della serie.
+          </li>
         </ul>
         <button type="button" class="next-btn" (click)="kickOff()">🏁 Fischio d'inizio!</button>
       </div>
@@ -66,6 +71,15 @@
           ⚡ <strong>CONTROPIEDE</strong> dei {{ opponent().name }}!<br />
           Questa l'avevi sbagliata: rispondi giusto per fermarli!
         </p>
+      } @else if (razor() === 'shooting') {
+        <div class="razor-bar" role="status">
+          <p class="razor-bar__text">
+            🎯 Tiro a rasoio: {{ razorHits() }} su {{ razorHitsNeeded }} · ⏱️ {{ razorSeconds() }} s
+          </p>
+          <div class="razor-bar__track">
+            <div class="razor-bar__fill" [style.width.%]="razorPercent()"></div>
+          </div>
+        </div>
       } @else {
         <p class="streak__label" [class.streak__label--danger]="wrongStreak() > 0">
           @if (wrongStreak() > 0) {
@@ -86,6 +100,23 @@
               <span class="goal-anim__ball">⚽</span>
             </div>
             <p class="goal-anim__cry">GO GO GO GOOOL!!</p>
+          </div>
+        }
+        @if (razor() === 'offer') {
+          <div class="razor-offer" role="dialog" aria-label="Tiro a rasoio">
+            <p class="razor-offer__title">🎯 Occasione! Tiro a rasoio</p>
+            <p>
+              Rispondi giusto a
+              <strong>{{ razorHitsNeeded }} domande in {{ razorSecondsTotal }} secondi</strong>
+              e fai gol subito!
+            </p>
+            <p class="razor-offer__risk">
+              Se sbagli o finisce il tempo, perdi una risposta della serie.
+            </p>
+            <div class="razor-offer__actions">
+              <button type="button" class="next-btn" (click)="acceptRazor()">⚡ Tira!</button>
+              <button type="button" class="speak-btn" (click)="declineRazor()">No, continuo</button>
+            </div>
           </div>
         }
         @if (current().clue; as clue) {
@@ -125,7 +156,13 @@
           @if (justScored() === 'loro') {
             <p class="shot-result shot-result--subito">😱 Gol dei {{ opponent().name }}!</p>
           }
-          @if (answered()) {
+          @if (razorMissed(); as reason) {
+            <p class="shot-result shot-result--subito">
+              {{ reason === 'tempo' ? '⏱️ Tempo scaduto!' : '🎯 Tiro sbagliato!' }} Il tiro a rasoio
+              è finito fuori: perdi una risposta della serie.
+            </p>
+          }
+          @if (answered() && razorMissed() !== 'tempo') {
             @if (isCorrect() && counter()) {
               <p class="shot-result shot-result--fermato">🧤 Contropiede fermato!</p>
             } @else if (isCorrect()) {
@@ -182,6 +219,9 @@
         </p>
         @if (counters() > 0) {
           <p>⚡ Contropiedi fermati: {{ countersStopped() }} su {{ counters() }}</p>
+        }
+        @if (razorTries() > 0) {
+          <p>🎯 Tiri a rasoio segnati: {{ razorGoals() }} su {{ razorTries() }}</p>
         }
         @if (isNewRecord()) {
           <p class="match-record match-record--new">

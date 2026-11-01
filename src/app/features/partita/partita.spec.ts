@@ -5,6 +5,8 @@ import { Tts } from '../../shared/tts';
 import { pickMatchQuestions, QUESTION_SOURCES } from './domande';
 import {
   COUNTER_SAVED_PAUSE_MS,
+  RAZOR_MISSED_PAUSE_MS,
+  RAZOR_SECONDS,
   FULL_TIME_WHISTLE,
   GOAL_PAUSE_MS,
   HALF_MINUTES,
@@ -63,8 +65,9 @@ describe('Partita', () => {
     fixture = TestBed.createComponent(Partita);
     c = fixture.componentInstance;
     fixture.detectChanges();
-    // Nessun contropiede, se non nei test che lo chiedono.
+    // Niente contropiede né tiro a rasoio, se non nei test che lo chiedono.
     c.random = () => 1;
+    c.razorRandom = () => 1;
   });
 
   afterEach(() => {
@@ -127,6 +130,73 @@ describe('Partita', () => {
     answer(true);
     answer(true);
     expect(c.counter()).toBe(false);
+  });
+
+  // Porta la serie a 2 e fa comparire la proposta del tiro a rasoio.
+  function offerRazor(): void {
+    c.kickOff();
+    answer(true);
+    c.razorRandom = () => 0;
+    answer(true);
+    c.razorRandom = () => 1;
+    expect(c.razor()).toBe('offer');
+  }
+
+  it('should score straight away with 2 right answers in 6 seconds', () => {
+    offerRazor();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Tiro a rasoio');
+    // Finché non si sceglie, la domanda non si può rispondere.
+    c.selectOption(c.current().missing);
+    expect(c.answered()).toBe(false);
+
+    c.acceptRazor();
+    c.selectOption(c.current().missing);
+    expect(c.razorHits()).toBe(1);
+    expect(c.answered()).toBe(false);
+    vi.advanceTimersByTime(2000);
+    c.selectOption(c.current().missing);
+    expect(c.goalsFor()).toBe(1);
+    expect(c.razorGoals()).toBe(1);
+    expect(c.razor()).toBe('off');
+  });
+
+  it('should lose one answer of the streak when the razor shot fails', () => {
+    offerRazor();
+    c.acceptRazor();
+    c.selectOption(c.current().missing);
+    vi.advanceTimersByTime(RAZOR_SECONDS * 1000);
+    fixture.detectChanges();
+    expect(c.razorMissed()).toBe('tempo');
+    expect(c.rightStreak()).toBe(1);
+    expect(fixture.nativeElement.textContent).toContain('Tempo scaduto');
+    vi.advanceTimersByTime(RAZOR_MISSED_PAUSE_MS);
+    expect(c.razorMissed()).toBe(null);
+    expect(c.answered()).toBe(false);
+
+    // Con un errore: serie meno uno e partita ferma, ma niente gol subito.
+    answer(true);
+    c.razorRandom = () => 0;
+    answer(true);
+    c.razorRandom = () => 1;
+    c.acceptRazor();
+    const question = c.current();
+    c.selectOption(question.options.find((o: string) => o !== question.missing));
+    expect(c.rightStreak()).toBe(2);
+    expect(c.paused()).toBe(true);
+    expect(c.goalsAgainst()).toBe(0);
+    expect(c.wrongStreak()).toBe(0);
+    c.resume();
+    expect(c.razorTries()).toBe(2);
+    expect(c.razorGoals()).toBe(0);
+  });
+
+  it('should let the player decline the razor shot', () => {
+    offerRazor();
+    c.declineRazor();
+    expect(c.razor()).toBe('off');
+    answer(true);
+    expect(c.rightStreak()).toBe(3);
   });
 
   it('should stop the clock after a mistake until "Riprendi" is pressed', () => {
