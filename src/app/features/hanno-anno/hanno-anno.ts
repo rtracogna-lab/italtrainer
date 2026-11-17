@@ -1,10 +1,13 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { GIOCO_HANNO_ANNO } from '../../core/risultati';
+import { Leaderboard } from '../../shared/leaderboard/leaderboard';
+import { computeScore, readRecord, saveRecord, TimedAnswer } from '../../shared/punteggio';
 import { RoundSummary, SummaryWord } from '../../shared/round-summary/round-summary';
+import { ScoreCard } from '../../shared/score-card/score-card';
 import { shuffle } from '../../shared/shuffle';
 import { Tts } from '../../shared/tts';
 import { fullSentence, GROUPS, HannoAnnoSentence, sentenceParts } from './frasi';
-import { computeScore, TimedAnswer } from './punteggio';
 
 const QUESTIONS_PER_ROUND = 10;
 // "Tutte" mescola gli argomenti; ogni argomento ha il suo record.
@@ -13,22 +16,6 @@ const RECORD_KEY = 'italtrainer.hanno-anno.record';
 
 function recordKey(topic: string): string {
   return topic === ALL ? RECORD_KEY : `${RECORD_KEY}.${topic}`;
-}
-
-function readRecord(topic: string): number {
-  try {
-    return Number(localStorage.getItem(recordKey(topic))) || 0;
-  } catch {
-    return 0;
-  }
-}
-
-function saveRecord(topic: string, points: number): void {
-  try {
-    localStorage.setItem(recordKey(topic), String(points));
-  } catch {
-    // Senza memoria del browser il record semplicemente non si salva.
-  }
 }
 
 // Con "Tutte" si pescano al massimo due frasi per argomento, così anche gli
@@ -42,7 +29,7 @@ function pickRound(topic: string): HannoAnnoSentence[] {
 }
 
 @Component({
-  imports: [RouterLink, RoundSummary],
+  imports: [Leaderboard, RouterLink, RoundSummary, ScoreCard],
   selector: 'app-hanno-anno',
   styleUrl: './hanno-anno.scss',
   templateUrl: './hanno-anno.html',
@@ -51,6 +38,7 @@ export class HannoAnno {
   protected readonly tts = inject(Tts);
 
   protected readonly total = QUESTIONS_PER_ROUND;
+  protected readonly game = GIOCO_HANNO_ANNO;
   protected readonly topics = [{ id: ALL, label: 'Tutte' }, ...GROUPS.map(({ id, label }) => ({ id, label }))];
 
   protected readonly topic = signal(ALL);
@@ -64,7 +52,7 @@ export class HannoAnno {
   // Tempo di risposta di ogni frase: dalla comparsa della frase alla scelta.
   protected readonly timedAnswers = signal<TimedAnswer[]>([]);
   protected readonly finalScore = computed(() => computeScore(this.timedAnswers()));
-  protected readonly record = signal(readRecord(ALL));
+  protected readonly record = signal(readRecord(recordKey(ALL)));
   protected readonly isNewRecord = signal(false);
   private questionStart = Date.now();
   protected readonly summary = computed<SummaryWord[]>(() =>
@@ -87,7 +75,7 @@ export class HannoAnno {
   // Cambiare argomento fa ripartire il round.
   protected chooseTopic(topic: string): void {
     this.topic.set(topic);
-    this.record.set(readRecord(topic));
+    this.record.set(readRecord(recordKey(topic)));
     this.restart();
   }
 
@@ -120,7 +108,7 @@ export class HannoAnno {
     this.isNewRecord.set(points > this.record());
     if (this.isNewRecord()) {
       this.record.set(points);
-      saveRecord(this.topic(), points);
+      saveRecord(recordKey(this.topic()), points);
     }
   }
 

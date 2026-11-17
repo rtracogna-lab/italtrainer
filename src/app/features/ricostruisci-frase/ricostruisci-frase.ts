@@ -1,5 +1,9 @@
 import { Component, computed, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { GIOCO_RICOSTRUISCI_FRASE } from '../../core/risultati';
+import { Leaderboard } from '../../shared/leaderboard/leaderboard';
+import { computeScore, readRecord, saveRecord, SLOW_BONUS_SECONDS, TimedAnswer } from '../../shared/punteggio';
+import { ScoreCard } from '../../shared/score-card/score-card';
 import { shuffle } from '../../shared/shuffle';
 
 interface SentenceDef {
@@ -59,6 +63,7 @@ const SENTENCES: SentenceDef[] = [
 ];
 
 const QUESTIONS_PER_ROUND = 10;
+const RECORD_KEY = 'italtrainer.ricostruisci-frase.record';
 
 function pickRound(): RoundItem[] {
   return shuffle(SENTENCES)
@@ -71,17 +76,24 @@ function shuffledBank(words: string[]): WordChip[] {
 }
 
 @Component({
-  imports: [RouterLink],
+  imports: [Leaderboard, RouterLink, ScoreCard],
   selector: 'app-ricostruisci-frase',
   styleUrl: './ricostruisci-frase.scss',
   templateUrl: './ricostruisci-frase.html',
 })
 export class RicostruisciFrase {
   protected readonly total = QUESTIONS_PER_ROUND;
+  protected readonly game = GIOCO_RICOSTRUISCI_FRASE;
 
   protected readonly items = signal(pickRound());
   protected readonly currentIndex = signal(0);
   protected readonly score = signal(0);
+  // Tempo di risposta di ogni domanda: dalla comparsa alla risposta.
+  protected readonly timedAnswers = signal<TimedAnswer[]>([]);
+  protected readonly finalScore = computed(() => computeScore(this.timedAnswers(), SLOW_BONUS_SECONDS));
+  protected readonly record = signal(readRecord(RECORD_KEY));
+  protected readonly isNewRecord = signal(false);
+  private questionStart = Date.now();
   protected readonly checked = signal(false);
   protected readonly bank = signal<WordChip[]>([]);
   protected readonly answer = signal<WordChip[]>([]);
@@ -128,6 +140,8 @@ export class RicostruisciFrase {
     if (this.checked() || this.bank().length > 0) {
       return;
     }
+    const seconds = (Date.now() - this.questionStart) / 1000;
+    this.timedAnswers.update((list) => [...list, { correct: this.isCorrect(), seconds }]);
     this.checked.set(true);
     if (this.isCorrect()) {
       this.score.update((value) => value + 1);
@@ -139,7 +153,20 @@ export class RicostruisciFrase {
     this.checked.set(false);
     this.answer.set([]);
     this.currentIndex.set(nextIndex);
+    this.questionStart = Date.now();
+    if (this.isFinished()) {
+      this.checkRecord();
+    }
     this.bank.set(nextIndex < this.total ? shuffledBank(this.items()[nextIndex].correctOrder) : []);
+  }
+
+  private checkRecord(): void {
+    const points = this.finalScore().total;
+    this.isNewRecord.set(points > this.record());
+    if (this.isNewRecord()) {
+      this.record.set(points);
+      saveRecord(RECORD_KEY, points);
+    }
   }
 
   protected restart(): void {
@@ -147,6 +174,9 @@ export class RicostruisciFrase {
     this.items.set(freshItems);
     this.currentIndex.set(0);
     this.score.set(0);
+    this.timedAnswers.set([]);
+    this.isNewRecord.set(false);
+    this.questionStart = Date.now();
     this.checked.set(false);
     this.answer.set([]);
     this.bank.set(shuffledBank(freshItems[0].correctOrder));

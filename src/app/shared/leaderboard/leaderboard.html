@@ -1,0 +1,55 @@
+@if (auth.loggedIn()) {
+  <div class="leaderboard">
+    <h3 class="leaderboard__title">🏅 I 10 migliori risultati</h3>
+    @switch (state()) {
+      @case ('loading') {
+        <p class="leaderboard__message">Carico la classifica…</p>
+      }
+      @case ('error') {
+        <p class="leaderboard__message leaderboard__message--error">Impossibile collegarsi al server. Riprova più tardi.</p>
+      }
+      @default {
+        <p class="leaderboard__message">
+          @if (newPosition() <= rows().length) {
+            Con {{ points() }} punti sei al <strong>{{ newPosition() }}° posto</strong>!
+          } @else {
+            Con {{ points() }} punti sei al {{ newPosition() }}° posto: fuori dai primi 10.
+          }
+        </p>
+        <table class="leaderboard__table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Chi</th>
+              <th>Punti</th>
+              <th>Quando</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of rows(); track row.position) {
+              <tr [class.leaderboard__row--new]="row.isNew">
+                <td>{{ row.position }}</td>
+                <td>{{ row.user }}</td>
+                <td>{{ row.points }}</td>
+                <td>
+                  @if (row.date) {
+                    {{ row.date | date: 'dd/MM/yyyy HH:mm' }}
+                  } @else {
+                    adesso (non salvato)
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+        @if (state() === 'saved') {
+          <p class="leaderboard__message leaderboard__message--saved">✅ Risultato salvato!</p>
+        } @else {
+          <button type="button" class="next-btn" [disabled]="state() === 'saving'" (click)="save()">
+            {{ state() === 'saving' ? 'Salvataggio…' : '💾 Salva il risultato' }}
+          </button>
+        }
+      }
+    }
+  </div>
+}

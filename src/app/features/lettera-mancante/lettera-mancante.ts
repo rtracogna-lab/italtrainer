@@ -1,7 +1,11 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { GIOCO_LETTERA_MANCANTE } from '../../core/risultati';
+import { Leaderboard } from '../../shared/leaderboard/leaderboard';
+import { computeScore, readRecord, saveRecord, TimedAnswer } from '../../shared/punteggio';
 import { PAROLE_DIFFICILI } from '../../shared/parole-difficili';
 import { RoundSummary, SummaryWord } from '../../shared/round-summary/round-summary';
+import { ScoreCard } from '../../shared/score-card/score-card';
 import { shuffle } from '../../shared/shuffle';
 import { Tts } from '../../shared/tts';
 
@@ -18,6 +22,7 @@ interface MissingLetterItem {
 const VOWELS = 'aeiou';
 const CONSONANTS = 'rlnmtdpbscgvf';
 const QUESTIONS_PER_ROUND = 10;
+const RECORD_KEY = 'italtrainer.lettera-mancante.record';
 
 const pickOne = <T>(items: T[]): T => items[Math.floor(Math.random() * items.length)];
 
@@ -43,7 +48,7 @@ function pickRound(): MissingLetterItem[] {
 // Il bambino vede la parola senza una lettera, senza sapere dove manca:
 // prima tocca il punto giusto, poi sceglie la lettera.
 @Component({
-  imports: [RouterLink, RoundSummary],
+  imports: [Leaderboard, RouterLink, RoundSummary, ScoreCard],
   selector: 'app-lettera-mancante',
   styleUrl: './lettera-mancante.scss',
   templateUrl: './lettera-mancante.html',
@@ -51,10 +56,17 @@ function pickRound(): MissingLetterItem[] {
 export class LetteraMancante {
   protected readonly tts = inject(Tts);
   protected readonly total = QUESTIONS_PER_ROUND;
+  protected readonly game = GIOCO_LETTERA_MANCANTE;
 
   protected readonly items = signal(pickRound());
   protected readonly currentIndex = signal(0);
   protected readonly score = signal(0);
+  // Tempo di risposta di ogni domanda: dalla comparsa alla risposta.
+  protected readonly timedAnswers = signal<TimedAnswer[]>([]);
+  protected readonly finalScore = computed(() => computeScore(this.timedAnswers()));
+  protected readonly record = signal(readRecord(RECORD_KEY));
+  protected readonly isNewRecord = signal(false);
+  private questionStart = Date.now();
   protected readonly chosenGap = signal<number | null>(null);
   protected readonly chosenLetter = signal<string | null>(null);
   protected readonly answered = signal(false);
@@ -112,12 +124,28 @@ export class LetteraMancante {
     this.chosenLetter.set(null);
     this.answered.set(false);
     this.currentIndex.update((index) => index + 1);
+    this.questionStart = Date.now();
+    if (this.isFinished()) {
+      this.checkRecord();
+    }
+  }
+
+  private checkRecord(): void {
+    const points = this.finalScore().total;
+    this.isNewRecord.set(points > this.record());
+    if (this.isNewRecord()) {
+      this.record.set(points);
+      saveRecord(RECORD_KEY, points);
+    }
   }
 
   protected restart(): void {
     this.items.set(pickRound());
     this.currentIndex.set(0);
     this.score.set(0);
+    this.timedAnswers.set([]);
+    this.isNewRecord.set(false);
+    this.questionStart = Date.now();
     this.results.set([]);
     this.chosenGap.set(null);
     this.chosenLetter.set(null);
@@ -127,6 +155,8 @@ export class LetteraMancante {
   private finish(result: { given: string; note?: string }): void {
     this.answered.set(true);
     this.results.update((list) => [...list, result]);
+    const seconds = (Date.now() - this.questionStart) / 1000;
+    this.timedAnswers.update((list) => [...list, { correct: this.isCorrect(), seconds }]);
     if (this.isCorrect()) {
       this.score.update((value) => value + 1);
     }

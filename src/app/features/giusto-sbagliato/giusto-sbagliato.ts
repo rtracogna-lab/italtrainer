@@ -1,5 +1,7 @@
 import { Component, computed, OnDestroy, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { GIOCO_GIUSTO_SBAGLIATO } from '../../core/risultati';
+import { Leaderboard } from '../../shared/leaderboard/leaderboard';
 import { sentenceParts } from '../hanno-anno/frasi';
 import { Card, makeCards, rightText, shownText } from './carte';
 
@@ -34,13 +36,14 @@ function saveRecord(points: number): void {
 // Gara a tempo: in 60 secondi dire di più frasi possibile se sono giuste o
 // sbagliate. Ogni errore toglie un punto, così non conviene tirare a caso.
 @Component({
-  imports: [RouterLink],
+  imports: [Leaderboard, RouterLink],
   selector: 'app-giusto-sbagliato',
   styleUrl: './giusto-sbagliato.scss',
   templateUrl: './giusto-sbagliato.html',
 })
 export class GiustoSbagliato implements OnDestroy {
   protected readonly gameSeconds = GAME_SECONDS;
+  protected readonly game = GIOCO_GIUSTO_SBAGLIATO;
 
   protected readonly phase = signal<Phase>('start');
   protected readonly cards = signal<Card[]>(makeCards());

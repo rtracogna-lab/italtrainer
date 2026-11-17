@@ -1,0 +1,50 @@
+// Classifica di tutti gli utenti, solo per chi ha fatto l'accesso.
+.leaderboard {
+  max-width: 420px;
+  margin: 0 auto 1.5rem;
+  padding: 1rem 1.25rem;
+  border: 2px solid #ccd3e0;
+  border-radius: 12px;
+  background: #fff;
+
+  &__title {
+    margin: 0 0 0.5rem;
+    color: #2b3a67;
+  }
+
+  &__message {
+    margin: 0.5rem 0;
+
+    &--error {
+      color: #c62828;
+    }
+
+    &--saved {
+      font-weight: 700;
+      color: #2e7d32;
+    }
+  }
+
+  &__table {
+    width: 100%;
+    margin: 0.5rem 0 1rem;
+    border-collapse: collapse;
+
+    th,
+    td {
+      padding: 0.3rem 0.4rem;
+      border-bottom: 1px solid #eef1fa;
+    }
+
+    th {
+      color: #666;
+      font-weight: 600;
+    }
+  }
+
+  &__row--new td {
+    font-weight: 700;
+    color: #e65100;
+    background: #fff6e5;
+  }
+}

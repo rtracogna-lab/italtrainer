@@ -1,7 +1,11 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { GIOCO_SILLABE } from '../../core/risultati';
+import { Leaderboard } from '../../shared/leaderboard/leaderboard';
+import { computeScore, readRecord, saveRecord, SLOW_BONUS_SECONDS, TimedAnswer } from '../../shared/punteggio';
 import { PAROLE_DIFFICILI, ParolaDifficile } from '../../shared/parole-difficili';
 import { RoundSummary, SummaryWord } from '../../shared/round-summary/round-summary';
+import { ScoreCard } from '../../shared/score-card/score-card';
 import { shuffle } from '../../shared/shuffle';
 import { Tts } from '../../shared/tts';
 
@@ -17,6 +21,7 @@ interface SyllableItem {
 
 const DISTRACTORS_PER_WORD = 2;
 const QUESTIONS_PER_ROUND = 10;
+const RECORD_KEY = 'italtrainer.sillabe.record';
 
 // Sillabe "trappola": una sillaba vera con una lettera in meno ("pr" al posto
 // di "per"), proprio l'errore che si vuole allenare.
@@ -44,7 +49,7 @@ function pickRound(): SyllableItem[] {
 // La voce dice una parola e il bambino la compone toccando le sillabe giuste,
 // evitando quelle a cui manca una lettera.
 @Component({
-  imports: [RouterLink, RoundSummary],
+  imports: [Leaderboard, RouterLink, RoundSummary, ScoreCard],
   selector: 'app-sillabe',
   styleUrl: './sillabe.scss',
   templateUrl: './sillabe.html',
@@ -52,10 +57,17 @@ function pickRound(): SyllableItem[] {
 export class Sillabe {
   protected readonly tts = inject(Tts);
   protected readonly total = QUESTIONS_PER_ROUND;
+  protected readonly game = GIOCO_SILLABE;
 
   protected readonly items = signal(pickRound());
   protected readonly currentIndex = signal(0);
   protected readonly score = signal(0);
+  // Tempo di risposta di ogni domanda: dalla comparsa alla risposta.
+  protected readonly timedAnswers = signal<TimedAnswer[]>([]);
+  protected readonly finalScore = computed(() => computeScore(this.timedAnswers(), SLOW_BONUS_SECONDS));
+  protected readonly record = signal(readRecord(RECORD_KEY));
+  protected readonly isNewRecord = signal(false);
+  private questionStart = Date.now();
   // Sillabe scelte, in ordine (id delle tessere).
   protected readonly built = signal<number[]>([]);
   protected readonly checked = signal(false);
@@ -114,7 +126,7 @@ export class Sillabe {
       if (firstWrong === null) {
         this.score.update((value) => value + 1);
       }
-      this.record(
+      this.saveAnswer(
         firstWrong === null
           ? { given: this.builtWord() }
           : { given: firstWrong, note: `avevi scritto “${firstWrong}”, poi l'hai corretta` },
@@ -122,13 +134,15 @@ export class Sillabe {
     } else if (firstWrong === null) {
       this.firstWrong.set(this.builtWord());
     } else {
-      this.record({ given: firstWrong, note: `avevi scritto “${firstWrong}” e poi “${this.builtWord()}”` });
+      this.saveAnswer({ given: firstWrong, note: `avevi scritto “${firstWrong}” e poi “${this.builtWord()}”` });
     }
   }
 
-  private record(answer: { given: string; note?: string }): void {
+  private saveAnswer(answer: { given: string; note?: string }): void {
     this.checked.set(true);
     this.answers.update((list) => [...list, answer]);
+    const seconds = (Date.now() - this.questionStart) / 1000;
+    this.timedAnswers.update((list) => [...list, { correct: this.isCorrect() && this.firstWrong() === null, seconds }]);
   }
 
   protected next(): void {
@@ -136,8 +150,21 @@ export class Sillabe {
     this.firstWrong.set(null);
     this.checked.set(false);
     this.currentIndex.update((index) => index + 1);
+    this.questionStart = Date.now();
+    if (this.isFinished()) {
+      this.checkRecord();
+    }
     if (!this.isFinished()) {
       this.speakWord();
+    }
+  }
+
+  private checkRecord(): void {
+    const points = this.finalScore().total;
+    this.isNewRecord.set(points > this.record());
+    if (this.isNewRecord()) {
+      this.record.set(points);
+      saveRecord(RECORD_KEY, points);
     }
   }
 
@@ -145,6 +172,9 @@ export class Sillabe {
     this.items.set(pickRound());
     this.currentIndex.set(0);
     this.score.set(0);
+    this.timedAnswers.set([]);
+    this.isNewRecord.set(false);
+    this.questionStart = Date.now();
     this.answers.set([]);
     this.firstWrong.set(null);
     this.built.set([]);

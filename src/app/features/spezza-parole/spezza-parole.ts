@@ -1,5 +1,9 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { GIOCO_SPEZZA_PAROLE } from '../../core/risultati';
+import { Leaderboard } from '../../shared/leaderboard/leaderboard';
+import { computeScore, readRecord, saveRecord, SLOW_BONUS_SECONDS, TimedAnswer } from '../../shared/punteggio';
+import { ScoreCard } from '../../shared/score-card/score-card';
 import { shuffle } from '../../shared/shuffle';
 import { Tts } from '../../shared/tts';
 
@@ -55,6 +59,7 @@ function buildRoundItem(phrase: SplitPhrase): RoundItem {
 }
 
 const QUESTIONS_PER_ROUND = 10;
+const RECORD_KEY = 'italtrainer.spezza-parole.record';
 
 function pickRound(): RoundItem[] {
   return shuffle(PHRASES)
@@ -75,7 +80,7 @@ function gapSetsMatch(a: Set<number>, b: Set<number>): boolean {
 }
 
 @Component({
-  imports: [RouterLink],
+  imports: [Leaderboard, RouterLink, ScoreCard],
   selector: 'app-spezza-parole',
   styleUrl: './spezza-parole.scss',
   templateUrl: './spezza-parole.html',
@@ -84,10 +89,17 @@ export class SpezzaParole {
   protected readonly tts = inject(Tts);
 
   protected readonly total = QUESTIONS_PER_ROUND;
+  protected readonly game = GIOCO_SPEZZA_PAROLE;
 
   protected readonly items = signal(pickRound());
   protected readonly currentIndex = signal(0);
   protected readonly score = signal(0);
+  // Tempo di risposta di ogni domanda: dalla comparsa alla risposta.
+  protected readonly timedAnswers = signal<TimedAnswer[]>([]);
+  protected readonly finalScore = computed(() => computeScore(this.timedAnswers(), SLOW_BONUS_SECONDS));
+  protected readonly record = signal(readRecord(RECORD_KEY));
+  protected readonly isNewRecord = signal(false);
+  private questionStart = Date.now();
   protected readonly userGaps = signal<Set<number>>(new Set());
   protected readonly checked = signal(false);
 
@@ -118,6 +130,8 @@ export class SpezzaParole {
     if (this.checked()) {
       return;
     }
+    const seconds = (Date.now() - this.questionStart) / 1000;
+    this.timedAnswers.update((list) => [...list, { correct: this.isCorrect(), seconds }]);
     this.checked.set(true);
     if (this.isCorrect()) {
       this.score.update((value) => value + 1);
@@ -128,12 +142,28 @@ export class SpezzaParole {
     this.userGaps.set(new Set());
     this.checked.set(false);
     this.currentIndex.update((index) => index + 1);
+    this.questionStart = Date.now();
+    if (this.isFinished()) {
+      this.checkRecord();
+    }
+  }
+
+  private checkRecord(): void {
+    const points = this.finalScore().total;
+    this.isNewRecord.set(points > this.record());
+    if (this.isNewRecord()) {
+      this.record.set(points);
+      saveRecord(RECORD_KEY, points);
+    }
   }
 
   protected restart(): void {
     this.items.set(pickRound());
     this.currentIndex.set(0);
     this.score.set(0);
+    this.timedAnswers.set([]);
+    this.isNewRecord.set(false);
+    this.questionStart = Date.now();
     this.userGaps.set(new Set());
     this.checked.set(false);
   }

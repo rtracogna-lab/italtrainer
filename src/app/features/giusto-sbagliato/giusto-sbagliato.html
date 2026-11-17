@@ -57,6 +57,7 @@
             <p class="score__record">Record: {{ record() }} punti</p>
           }
         </div>
+        <app-leaderboard [game]="game" [points]="points()" />
 
         @if (mistakes().length > 0) {
           <h3>Ripassa le frasi sbagliate</h3>

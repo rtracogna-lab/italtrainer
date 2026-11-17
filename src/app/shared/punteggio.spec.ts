@@ -8,6 +8,12 @@ describe('punteggio', () => {
     expect(speedBonus(25)).toBe(0);
   });
 
+  it('should spread the bonus over a longer time for slow games', () => {
+    expect(speedBonus(0.5, 25)).toBe(50);
+    expect(speedBonus(10.4, 25)).toBe(30);
+    expect(speedBonus(25, 25)).toBe(0);
+  });
+
   it('should add points for correct answers and take 100 off for each mistake', () => {
     const score = computeScore([
       { correct: true, seconds: 2 },

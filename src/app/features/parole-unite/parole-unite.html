@@ -45,7 +45,10 @@
   } @else {
     <div class="result-card">
       <h2>Hai finito! 🎉</h2>
-      <p>Punteggio: {{ score() }} su {{ total }}</p>
+      <p>Risposte giuste: {{ score() }} su {{ total }} · Tempo: {{ finalScore().totalSeconds }} secondi</p>
+
+      <app-score-card [score]="finalScore()" [record]="record()" [isNewRecord]="isNewRecord()" />
+      <app-leaderboard [game]="game" [points]="finalScore().total" />
       <button type="button" class="next-btn" (click)="restart()">Ricomincia</button>
     </div>
   }
