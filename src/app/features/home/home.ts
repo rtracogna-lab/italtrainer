@@ -85,6 +85,12 @@ export class Home {
       route: '/partita',
     },
     {
+      title: 'Torneo',
+      description: '8 squadre, due gironi, semifinali e finale: porta la tua squadra a vincere la coppa!',
+      icon: '🏆',
+      route: '/torneo',
+    },
+    {
       title: 'Dettato',
       description: 'La prova finale: ascolta il dettato e scrivilo sul foglio, una parte alla volta.',
       icon: '✏️',

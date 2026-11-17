@@ -74,6 +74,22 @@ export const routes: Routes = [
     title: 'ItalTrainer - La partita',
   },
   {
+    path: 'torneo',
+    loadComponent: () => import('./features/torneo/elenco/elenco').then((m) => m.ElencoTornei),
+    title: 'ItalTrainer - Torneo',
+  },
+  {
+    path: 'torneo/:id',
+    loadComponent: () => import('./features/torneo/tabellone/tabellone').then((m) => m.Tabellone),
+    title: 'ItalTrainer - Torneo',
+  },
+  {
+    path: 'torneo/:id/partita/:idPartita',
+    loadComponent: () =>
+      import('./features/torneo/partita-torneo/partita-torneo').then((m) => m.PartitaTorneo),
+    title: 'ItalTrainer - Torneo',
+  },
+  {
     path: 'login',
     loadComponent: () => import('./features/login/login').then((m) => m.Login),
     title: 'ItalTrainer - Accedi',

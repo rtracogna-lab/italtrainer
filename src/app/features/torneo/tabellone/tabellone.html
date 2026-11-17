@@ -1,0 +1,123 @@
+<section class="challenge-view">
+  <a class="challenge-view__back" routerLink="/torneo">← Torna ai tornei</a>
+
+  @if (error()) {
+    <p class="bracket-error" role="alert">{{ error() }}</p>
+  }
+
+  @if (dati(); as d) {
+    <h1 class="challenge-view__title">🏆 {{ d.torneo.nome }}</h1>
+    <p class="bracket-subtitle">
+      Creato il {{ d.torneo.data_creazione | date: 'dd/MM/yyyy' }} · La tua squadra: <app-stemma [stemma]="giocatore().stemma" [nome]="giocatore().nome" />
+      <strong>{{ giocatore().nome }}</strong> (girone {{ giocatore().girone }})
+    </p>
+
+    <div class="next-turn">
+      @if (d.torneo.stato === 'concluso') {
+        <h2>Torneo concluso!</h2>
+        <p class="next-turn__result">{{ d.torneo.piazzamento }}</p>
+      } @else {
+        <h2>{{ nomeTurno() }}</h2>
+        @if (partitaMia(); as partita) {
+          <p>Si gioca contro <app-stemma [stemma]="avversario(partita).stemma" [nome]="avversario(partita).nome" /> <strong>{{ avversario(partita).nome }}</strong>!</p>
+          <a class="next-btn" [routerLink]="['/torneo', id(), 'partita', partita.idf_partita]">⚽ Gioca la partita</a>
+        } @else {
+          <p>La tua squadra non gioca in questo turno: guarda come va a finire!</p>
+          <button type="button" class="next-btn" [disabled]="simulating()" (click)="simulate()">
+            {{ simulating() ? 'Si gioca…' : '▶️ Gioca il turno' }}
+          </button>
+        }
+      }
+    </div>
+
+    <h2>Fase finale</h2>
+    <div class="knockout">
+      <div class="knockout__round">
+        <h3>Semifinali</h3>
+        @for (partita of semifinali(); track partita.idf_partita) {
+          <ng-container *ngTemplateOutlet="match; context: { $implicit: partita }" />
+        } @empty {
+          <p class="knockout__tbd">1ª girone A – 2ª girone B</p>
+          <p class="knockout__tbd">1ª girone B – 2ª girone A</p>
+        }
+      </div>
+      <div class="knockout__round">
+        <h3>Finale</h3>
+        @for (partita of finale(); track partita.idf_partita) {
+          <ng-container *ngTemplateOutlet="match; context: { $implicit: partita }" />
+        } @empty {
+          <p class="knockout__tbd">Da definire</p>
+        }
+      </div>
+    </div>
+
+    @for (g of gironi(); track g.girone) {
+      <h2>Girone {{ g.girone }}</h2>
+      <table class="standings">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th class="standings__team">Squadra</th>
+            <th title="Giocate">G</th>
+            <th title="Vinte">V</th>
+            <th title="Pareggiate">N</th>
+            <th title="Perse">P</th>
+            <th title="Gol fatti e gol subiti">Gol</th>
+            <th title="Punti">Pt</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (riga of g.classifica; track riga.squadra.idf_squadra; let i = $index) {
+            <tr [class.standings__row--mine]="riga.squadra.giocatore" [class.standings__row--qualified]="i < 2">
+              <td>{{ i + 1 }}</td>
+              <td class="standings__team"><app-stemma [stemma]="riga.squadra.stemma" [nome]="riga.squadra.nome" /> {{ riga.squadra.nome }}</td>
+              <td>{{ riga.giocate }}</td>
+              <td>{{ riga.vinte }}</td>
+              <td>{{ riga.pari }}</td>
+              <td>{{ riga.perse }}</td>
+              <td>{{ riga.golFatti }}-{{ riga.golSubiti }}</td>
+              <td>
+                <strong>{{ riga.punti }}</strong>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+      <div class="matchdays">
+        @for (giornata of g.giornate; track giornata.nome) {
+          <div class="matchdays__day">
+            <h3>{{ giornata.nome }}</h3>
+            @for (partita of giornata.partite; track partita.idf_partita) {
+              <ng-container *ngTemplateOutlet="match; context: { $implicit: partita }" />
+            }
+          </div>
+        }
+      </div>
+    }
+  } @else if (!error()) {
+    <p>Carico il tabellone…</p>
+  }
+</section>
+
+<ng-template #match let-partita>
+  @let casa = squadra(partita.idf_casa);
+  @let ospite = squadra(partita.idf_ospite);
+  <div class="match" [class.match--mine]="casa.giocatore || ospite.giocatore">
+    <span class="match__team match__team--home" [class.match__team--winner]="vince(partita, casa.idf_squadra)">
+      {{ casa.nome }} <app-stemma [stemma]="casa.stemma" [nome]="casa.nome" />
+    </span>
+    <span class="match__score">
+      @if (giocata(partita)) {
+        {{ partita.gol_casa }} – {{ partita.gol_ospite }}
+        @if (partita.rigori_casa !== null) {
+          <small>({{ partita.rigori_casa }}–{{ partita.rigori_ospite }} rig.)</small>
+        }
+      } @else {
+        – : –
+      }
+    </span>
+    <span class="match__team" [class.match__team--winner]="vince(partita, ospite.idf_squadra)">
+      <app-stemma [stemma]="ospite.stemma" [nome]="ospite.nome" /> {{ ospite.nome }}
+    </span>
+  </div>
+</ng-template>

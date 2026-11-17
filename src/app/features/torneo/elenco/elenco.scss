@@ -1,0 +1,130 @@
+.tournament-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  max-width: 420px;
+  margin: 0 auto 2rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  background: #fff;
+  text-align: left;
+
+  &__title {
+    margin: 0;
+  }
+
+  &__rules {
+    margin: 0;
+    color: #555;
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-weight: 600;
+
+    input {
+      padding: 0.6rem 0.75rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font: inherit;
+      font-weight: 400;
+    }
+  }
+
+  &__error {
+    margin: 0;
+    color: #c62828;
+  }
+}
+
+.tournament-list {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+
+  &__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  &__item {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.2rem 1rem;
+    padding: 0.75rem 1rem;
+    border: 2px solid #ccd3e0;
+    border-radius: 12px;
+    background: #fff;
+    color: inherit;
+    text-align: left;
+    text-decoration: none;
+
+    &:hover {
+      border-color: #2b3a67;
+    }
+  }
+
+  &__date {
+    color: #666;
+    text-align: right;
+  }
+
+  &__state {
+    grid-column: 1 / -1;
+    color: #2b3a67;
+  }
+
+  &__delete {
+    padding: 0 0.75rem;
+    border: 2px solid #ccd3e0;
+    border-radius: 12px;
+    background: #fff;
+    font-size: 1.2rem;
+    cursor: pointer;
+
+    &:hover {
+      border-color: #c62828;
+      background: #ffebee;
+    }
+  }
+
+  &__confirm {
+    flex-basis: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #c62828;
+    border-radius: 12px;
+    background: #ffebee;
+
+    p {
+      margin: 0 0 0.75rem;
+    }
+
+    button + button {
+      margin-left: 0.5rem;
+    }
+  }
+
+  &__yes {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 8px;
+    background: #c62828;
+    color: #fff;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
+  }
+}

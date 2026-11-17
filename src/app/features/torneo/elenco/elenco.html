@@ -1,0 +1,77 @@
+<section class="challenge-view">
+  <a class="challenge-view__back" routerLink="/">← Torna alla scelta della sfida</a>
+  <h1 class="challenge-view__title">🏆 Torneo</h1>
+
+  @if (!auth.loggedIn()) {
+    <div class="result-card">
+      <p>Per giocare un torneo devi prima accedere: così il tabellone resta salvato e puoi riprenderlo quando vuoi.</p>
+      <a class="next-btn" routerLink="/login">Accedi</a>
+    </div>
+  } @else {
+    <form class="tournament-form" (ngSubmit)="create()">
+      <h2 class="tournament-form__title">Nuovo torneo</h2>
+      <p class="tournament-form__rules">
+        8 squadre in due gironi da 4. Le prime due di ogni girone vanno in semifinale, poi la finale. Le tue partite
+        le giochi tu, le altre si giocano da sole.
+      </p>
+      <label class="tournament-form__field">
+        Nome del torneo
+        <input name="nome" [(ngModel)]="nome" maxlength="100" required />
+      </label>
+      <label class="tournament-form__field">
+        Nome della tua squadra
+        <input name="nomeSquadra" [(ngModel)]="nomeSquadra" maxlength="50" required />
+      </label>
+      @if (error()) {
+        <p class="tournament-form__error" role="alert">{{ error() }}</p>
+      }
+      <button type="submit" class="next-btn" [disabled]="creating()">
+        {{ creating() ? 'Sorteggio in corso…' : '🎲 Sorteggia il tabellone' }}
+      </button>
+    </form>
+
+    <h2>I tuoi tornei</h2>
+    @if (loading()) {
+      <p>Carico i tornei…</p>
+    } @else if (tornei().length === 0) {
+      <p>Non hai ancora giocato nessun torneo.</p>
+    } @else {
+      <ul class="tournament-list">
+        @for (torneo of tornei(); track torneo.idf_torneo) {
+          <li class="tournament-list__row">
+            <a class="tournament-list__item" [routerLink]="['/torneo', torneo.idf_torneo]">
+              <strong>{{ torneo.nome }}</strong>
+              <span class="tournament-list__date">{{ torneo.data_creazione | date: 'dd/MM/yyyy' }}</span>
+              <span class="tournament-list__state">
+                {{ torneo.stato === 'concluso' ? torneo.piazzamento : '⏳ In corso' }}
+              </span>
+            </a>
+            <button
+              type="button"
+              class="tournament-list__delete"
+              [attr.aria-label]="'Elimina ' + torneo.nome"
+              title="Elimina il torneo"
+              (click)="confirming.set(torneo.idf_torneo)"
+            >
+              🗑️
+            </button>
+            @if (confirming() === torneo.idf_torneo) {
+              <div class="tournament-list__confirm" role="alertdialog">
+                <p>
+                  Vuoi eliminare <strong>{{ torneo.nome }}</strong> con tutte le squadre e le partite? Non si potrà
+                  recuperare.
+                </p>
+                <button type="button" class="tournament-list__yes" [disabled]="deleting()" (click)="remove(torneo.idf_torneo)">
+                  {{ deleting() ? 'Elimino…' : 'Sì, elimina' }}
+                </button>
+                <button type="button" class="speak-btn" [disabled]="deleting()" (click)="confirming.set(null)">
+                  No, tienilo
+                </button>
+              </div>
+            }
+          </li>
+        }
+      </ul>
+    }
+  }
+</section>

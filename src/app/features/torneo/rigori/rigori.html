@@ -1,0 +1,65 @@
+<div class="penalties">
+  <h2 class="penalties__title">🥅 Calci di rigore{{ suddenDeath() ? ' · a oltranza!' : '' }}</h2>
+
+  <table class="penalties__board">
+    <tr>
+      <th><app-stemma stemma="🔵" [nome]="teamName()" /> {{ teamName() }}</th>
+      @for (slot of slots; track slot) {
+        <td>{{ ours()[slot] === undefined ? '◯' : ours()[slot] ? '⚽' : '❌' }}</td>
+      }
+      @for (kick of ours().slice(slots.length); track $index) {
+        <td>{{ kick ? '⚽' : '❌' }}</td>
+      }
+    </tr>
+    <tr>
+      <th><app-stemma [stemma]="rival().badge" [nome]="rival().name" /> {{ rival().name }}</th>
+      @for (slot of slots; track slot) {
+        <td>{{ theirs()[slot] === undefined ? '◯' : theirs()[slot] ? '⚽' : '❌' }}</td>
+      }
+      @for (kick of theirs().slice(slots.length); track $index) {
+        <td>{{ kick ? '⚽' : '❌' }}</td>
+      }
+    </tr>
+  </table>
+
+  @if (winner(); as side) {
+    <p class="penalties__end" [class.penalties__end--lost]="side === 'loro'">
+      {{ side === 'noi' ? '🏆 Hai vinto ai rigori!' : '😢 Hanno vinto loro ai rigori…' }}
+    </p>
+  } @else if (theirTurn()) {
+    <p class="feedback" [class.feedback--correct]="lastOurs()" [class.feedback--wrong]="!lastOurs()">
+      {{ lastOurs() ? '⚽ Gol! Rigore segnato.' : '❌ Sbagliato: rigore fallito!' }}
+    </p>
+    @if (selected() !== null && !lastOurs()) {
+      @let shot = questions()[ours().length - 1];
+      <p class="exercise-card__hint">Si scrive "{{ shot.prefix }}{{ shot.missing }}{{ shot.suffix }}".</p>
+    }
+    <button type="button" class="next-btn" (click)="theyShoot()">🧤 Ora tirano loro: para!</button>
+  } @else {
+    @if (lastTheirs() !== undefined) {
+      <p class="penalties__their" [class.penalties__their--saved]="!lastTheirs()">
+        {{ lastTheirs() ? '😱 Hanno segnato.' : '🧤 Parato! Il loro rigore è fallito.' }}
+      </p>
+    }
+    <div class="exercise-card">
+      <p class="penalties__turn">Tocca a te: rispondi giusto e fai gol!</p>
+      @if (current().clue; as clue) {
+        <p class="exercise-card__clue">{{ clue }}</p>
+      }
+      @if (current().hint; as hint) {
+        <p class="exercise-card__hint">{{ hint }}</p>
+      }
+      @if (tts.supported) {
+        <button type="button" class="speak-btn" aria-label="Ascolta" (click)="speak()">🔊 Ascolta</button>
+      }
+      <p class="exercise-card__text">
+        {{ current().prefix }}<span class="exercise-card__blank">···</span>{{ current().suffix }}
+      </p>
+      <div class="options">
+        @for (option of current().options; track option) {
+          <button type="button" class="option-btn" (click)="shoot(option)">{{ option }}</button>
+        }
+      </div>
+    </div>
+  }
+</div>

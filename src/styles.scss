@@ -208,6 +208,8 @@ body {
 }
 
 .next-btn {
+  // Anche sui link (<a class="next-btn">).
+  display: inline-block;
   padding: 0.75rem 1.5rem;
   font-size: 1rem;
   font-weight: 700;
@@ -215,6 +217,7 @@ body {
   background: #2b3a67;
   border: none;
   border-radius: 10px;
+  text-decoration: none;
   cursor: pointer;
 
   &:hover:not(:disabled) {

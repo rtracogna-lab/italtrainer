@@ -1,7 +1,8 @@
-import { Component, computed, inject, OnDestroy, signal } from '@angular/core';
+import { Component, computed, inject, input, linkedSignal, OnDestroy, output, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { RoundSummary, SummaryWord } from '../../shared/round-summary/round-summary';
 import { shuffle } from '../../shared/shuffle';
+import { Stemma } from '../../shared/stemma/stemma';
 import { Whistle } from '../../shared/fischio';
 import { Tts } from '../../shared/tts';
 import { MatchQuestion, pickMatchQuestions } from './domande';
@@ -50,9 +51,14 @@ const QUESTIONS_PER_BATCH = 20;
 const WINS_KEY = 'italtrainer.partita.vittorie';
 const RECORD_GOALS_KEY = 'italtrainer.partita.record-gol';
 
-interface Opponent {
+export interface Opponent {
   name: string;
   badge: string;
+}
+
+export interface MatchResult {
+  goalsFor: number;
+  goalsAgainst: number;
 }
 
 interface Goal {
@@ -103,12 +109,18 @@ function pickOpponent(): Opponent {
 }
 
 @Component({
-  imports: [RouterLink, RoundSummary],
+  imports: [RouterLink, RoundSummary, Stemma],
   selector: 'app-partita',
   styleUrl: './partita.scss',
   templateUrl: './partita.html',
 })
 export class Partita implements OnDestroy {
+  // Nel torneo l'avversario lo decide il tabellone: niente titolo, niente
+  // "Nuova partita", e alla fine si avvisa con `ended`.
+  readonly rival = input<Opponent | null>(null);
+  readonly teamName = input('Tu');
+  readonly ended = output<MatchResult>();
+
   protected readonly tts = inject(Tts);
   private readonly whistle = inject(Whistle);
 
@@ -123,7 +135,8 @@ export class Partita implements OnDestroy {
   // Minuto di gioco, con i decimali: da 0 a 45 nel primo tempo, da 45 a 90
   // nel secondo.
   protected readonly minute = signal(0);
-  protected readonly opponent = signal(pickOpponent());
+  protected readonly opponent = linkedSignal(() => this.rival() ?? pickOpponent());
+  protected readonly inTournament = computed(() => this.rival() !== null);
   protected readonly questions = signal(pickMatchQuestions(QUESTIONS_PER_BATCH));
   protected readonly currentIndex = signal(0);
   protected readonly selected = signal<string | null>(null);
@@ -476,6 +489,7 @@ export class Partita implements OnDestroy {
       this.recordGoals.set(this.goalsFor());
       saveNumber(RECORD_GOALS_KEY, this.goalsFor());
     }
+    this.ended.emit({ goalsFor: this.goalsFor(), goalsAgainst: this.goalsAgainst() });
   }
 
   private resetAction(): void {

@@ -1,11 +1,13 @@
 <section class="challenge-view">
-  <a class="challenge-view__back" routerLink="/">← Torna alla scelta della sfida</a>
-  <h1 class="challenge-view__title">⚽ La partita</h1>
+  @if (!inTournament()) {
+    <a class="challenge-view__back" routerLink="/">← Torna alla scelta della sfida</a>
+    <h1 class="challenge-view__title">⚽ La partita</h1>
+  }
 
   <div class="scoreboard">
-    <span class="scoreboard__team">🔵 Tu</span>
+    <span class="scoreboard__team"><app-stemma stemma="🔵" [nome]="teamName()" /> {{ teamName() }}</span>
     <span class="scoreboard__score">{{ goalsFor() }} – {{ goalsAgainst() }}</span>
-    <span class="scoreboard__team">{{ opponent().badge }} {{ opponent().name }}</span>
+    <span class="scoreboard__team"><app-stemma [stemma]="opponent().badge" [nome]="opponent().name" /> {{ opponent().name }}</span>
     <span class="scoreboard__clock">
       @switch (phase()) {
         @case ('prepartita') {
@@ -248,12 +250,17 @@
         @if (mistakes().length > 0) {
           <h3>Ripassa gli errori</h3>
           <app-round-summary [words]="summary()" [dictation]="false">
-            <button type="button" class="next-btn" (click)="restart()">Nuova partita</button>
+            @if (!inTournament()) {
+              <button type="button" class="next-btn" (click)="restart()">Nuova partita</button>
+            }
           </app-round-summary>
         } @else {
           <p>🎉 Nessun errore in tutta la partita!</p>
-          <button type="button" class="next-btn" (click)="restart()">Nuova partita</button>
+          @if (!inTournament()) {
+            <button type="button" class="next-btn" (click)="restart()">Nuova partita</button>
+          }
         }
+        <ng-content />
       </div>
     }
   }

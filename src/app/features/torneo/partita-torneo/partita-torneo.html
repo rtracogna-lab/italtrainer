@@ -1,0 +1,52 @@
+<section class="challenge-view">
+  <a class="challenge-view__back" [routerLink]="['/torneo', id()]">← Torna al tabellone</a>
+
+  @if (loadError()) {
+    <p class="tournament-error" role="alert">Impossibile caricare il torneo. Riprova più tardi.</p>
+  } @else if (dati(); as d) {
+    @if (!partita()) {
+      <p>Questa partita non fa parte del torneo.</p>
+    } @else {
+      <h1 class="challenge-view__title">🏆 {{ d.torneo.nome }} · {{ nomeTurno() }}</h1>
+
+      @if (giaGiocata()) {
+        <div class="result-card">
+          <p>Questa partita è già stata giocata.</p>
+          <a class="next-btn" [routerLink]="['/torneo', id()]">📋 Torna al tabellone</a>
+        </div>
+      } @else if (phase() === 'partita') {
+        <app-partita [rival]="rival()" [teamName]="giocatore().nome" (ended)="onMatchEnded($event)">
+          <ng-container *ngTemplateOutlet="esito" />
+        </app-partita>
+      } @else {
+        <div class="result-card">
+          <app-rigori [teamName]="giocatore().nome" [rival]="rival()" (ended)="onPenalties($event)" />
+          <ng-container *ngTemplateOutlet="esito" />
+        </div>
+      }
+    }
+  } @else {
+    <p>Carico la partita…</p>
+  }
+</section>
+
+<ng-template #esito>
+  <div class="tournament-outcome">
+    @switch (saveState()) {
+      @case ('pareggio') {
+        <p class="tournament-outcome__text">🤝 Pareggio: si decide ai calci di rigore!</p>
+        <button type="button" class="next-btn" (click)="startPenalties()">🥅 Ai rigori!</button>
+      }
+      @case ('saving') {
+        <p>Salvo il risultato e si giocano le altre partite…</p>
+      }
+      @case ('saved') {
+        <a class="next-btn" [routerLink]="['/torneo', id()]">📋 Torna al tabellone</a>
+      }
+      @case ('error') {
+        <p class="tournament-error" role="alert">Impossibile salvare il risultato.</p>
+        <button type="button" class="next-btn" (click)="save()">🔁 Riprova</button>
+      }
+    }
+  </div>
+</ng-template>
