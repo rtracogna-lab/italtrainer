@@ -74,6 +74,11 @@ export const routes: Routes = [
     title: 'ItalTrainer - La partita',
   },
   {
+    path: 'login',
+    loadComponent: () => import('./features/login/login').then((m) => m.Login),
+    title: 'ItalTrainer - Accedi',
+  },
+  {
     path: '**',
     redirectTo: '',
   },

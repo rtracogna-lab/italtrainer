@@ -1,5 +1,6 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
+import { Auth } from './core/auth';
 
 @Component({
   imports: [RouterOutlet, RouterLink],
@@ -9,4 +10,5 @@ import { RouterLink, RouterOutlet } from '@angular/router';
 })
 export class App {
   protected readonly title = signal('italTrainer');
+  protected readonly auth = inject(Auth);
 }

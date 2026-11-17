@@ -1,0 +1,23 @@
+<section class="login">
+  <h1 class="login__title">Accedi</h1>
+
+  <form class="login__form" (ngSubmit)="submit()">
+    <label class="login__field">
+      Utente
+      <input name="utente" [(ngModel)]="utente" autocomplete="username" maxlength="50" required />
+    </label>
+
+    <label class="login__field">
+      Password
+      <input name="pwd" type="password" [(ngModel)]="pwd" autocomplete="current-password" maxlength="50" required />
+    </label>
+
+    @if (error()) {
+      <p class="login__error" role="alert">{{ error() }}</p>
+    }
+
+    <button class="login__submit" type="submit" [disabled]="loading()">
+      {{ loading() ? 'Accesso in corso…' : 'Entra' }}
+    </button>
+  </form>
+</section>

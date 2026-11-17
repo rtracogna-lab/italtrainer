@@ -1,6 +1,15 @@
 <div class="app-shell">
   <header class="app-header">
     <a class="app-header__brand" routerLink="/">📖 {{ title() }}</a>
+
+    @if (auth.user(); as user) {
+      <span class="app-header__user">
+        {{ user.utente }}
+        <button class="app-header__link" type="button" (click)="auth.logout()">Esci</button>
+      </span>
+    } @else {
+      <a class="app-header__link" routerLink="/login">Accedi</a>
+    }
   </header>
 
   <main class="app-main">
