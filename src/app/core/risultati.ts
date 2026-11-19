@@ -13,6 +13,28 @@ export const GIOCO_CE_CIE = 8;
 export const GIOCO_LETTERA_MANCANTE = 9;
 export const GIOCO_SILLABE = 10;
 
+// Pagina di ogni gioco, per mandare il bambino a quelli non ancora superati.
+export const PERCORSO_GIOCO: Record<number, string> = {
+  [GIOCO_DOPPIE]: '/doppie',
+  [GIOCO_HANNO_ANNO]: '/hanno-anno',
+  [GIOCO_GIUSTO_SBAGLIATO]: '/giusto-sbagliato',
+  [GIOCO_PAROLE_UNITE]: '/parole-unite',
+  [GIOCO_SPEZZA_PAROLE]: '/spezza-parole',
+  [GIOCO_RICOSTRUISCI_FRASE]: '/ricostruisci-frase',
+  [GIOCO_QUI_QUO_QUA]: '/qui-quo-qua',
+  [GIOCO_CE_CIE]: '/ce-cie',
+  [GIOCO_LETTERA_MANCANTE]: '/lettera-mancante',
+  [GIOCO_SILLABE]: '/sillabe',
+};
+
+// Un gioco è superato quando l'utente ha fatto almeno una volta un punteggio
+// pari o superiore alla soglia del gioco (supabase/superati.sql).
+export interface GiocoSuperato {
+  idf_gioco: number;
+  descrizione_gioco: string;
+  superato: boolean;
+}
+
 export interface Risultato {
   utente: string;
   risultato: number;
@@ -48,5 +70,13 @@ export class Risultati {
     if (error) {
       throw error;
     }
+  }
+
+  async giochiSuperati(idfUser: number): Promise<GiocoSuperato[]> {
+    const { data, error } = await supabase.rpc('giochi_superati', { p_idf_user: idfUser });
+    if (error) {
+      throw error;
+    }
+    return data as GiocoSuperato[];
   }
 }

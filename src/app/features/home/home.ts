@@ -1,5 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { Auth } from '../../core/auth';
+import { GiocoSuperato, PERCORSO_GIOCO, Risultati } from '../../core/risultati';
+
+const TORNEO = '/torneo';
+// Gioco della tabella giochi per ogni pagina.
+const GIOCO_DA_PERCORSO = new Map(Object.entries(PERCORSO_GIOCO).map(([gioco, percorso]) => [percorso, Number(gioco)]));
 
 interface Challenge {
   title: string;
@@ -16,7 +22,41 @@ interface Challenge {
   styleUrl: './home.scss',
   templateUrl: './home.html',
 })
-export class Home {
+export class Home implements OnInit {
+  protected readonly auth = inject(Auth);
+  private readonly risultati = inject(Risultati);
+
+  // Vuoto finché non arriva la risposta (o se l'utente non ha fatto l'accesso).
+  private readonly giochi = signal<GiocoSuperato[]>([]);
+  private readonly superati = computed(
+    () => new Set(this.giochi().filter((gioco) => gioco.superato).map((gioco) => gioco.idf_gioco)),
+  );
+  protected readonly mostraStato = computed(() => this.auth.loggedIn() && this.giochi().length > 0);
+  protected readonly torneoAbilitato = computed(() => this.superati().size === this.giochi().length);
+  protected readonly contaSuperati = computed(() => this.superati().size);
+  protected readonly totaleGiochi = computed(() => this.giochi().length);
+
+  async ngOnInit(): Promise<void> {
+    const user = this.auth.user();
+    if (!user) {
+      return;
+    }
+    try {
+      this.giochi.set(await this.risultati.giochiSuperati(user.idf_user));
+    } catch {
+      // Senza server la home si vede lo stesso, solo senza le spunte.
+    }
+  }
+
+  protected isTorneo(challenge: Challenge): boolean {
+    return challenge.route === TORNEO;
+  }
+
+  protected isSuperato(challenge: Challenge): boolean {
+    const gioco = GIOCO_DA_PERCORSO.get(challenge.route);
+    return gioco !== undefined && this.superati().has(gioco);
+  }
+
   protected readonly challenges: Challenge[] = [
     {
       title: 'Doppie',

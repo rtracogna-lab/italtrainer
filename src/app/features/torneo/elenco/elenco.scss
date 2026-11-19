@@ -128,3 +128,31 @@
     }
   }
 }
+
+.tournament-lock {
+  max-width: 420px;
+  margin: 0 auto 2rem;
+  text-align: left;
+
+  &__title {
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+
+  &__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0;
+    list-style: none;
+
+    a {
+      display: inline-block;
+      padding: 0.35rem 0.75rem;
+      border: 1px solid #2b3a67;
+      border-radius: 999px;
+      color: #2b3a67;
+      text-decoration: none;
+    }
+  }
+}

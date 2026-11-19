@@ -1,12 +1,27 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { Auth } from '../../../core/auth';
+import { GiocoSuperato, Risultati } from '../../../core/risultati';
 import { TorneiDb } from '../tornei-db';
 import { ElencoTornei } from './elenco';
 
 describe('ElencoTornei', () => {
   let fixture: ComponentFixture<ElencoTornei>;
   let db: TorneiDb;
+  let giochi: GiocoSuperato[];
+
+  const gioco = (idf_gioco: number, descrizione_gioco: string, superato: boolean): GiocoSuperato => ({
+    idf_gioco,
+    descrizione_gioco,
+    superato,
+  });
+
+  async function render(): Promise<void> {
+    vi.spyOn(TestBed.inject(Risultati), 'giochiSuperati').mockResolvedValue(giochi);
+    fixture = TestBed.createComponent(ElencoTornei);
+    await fixture.whenStable();
+    fixture.detectChanges();
+  }
 
   beforeEach(async () => {
     TestBed.configureTestingModule({ imports: [ElencoTornei], providers: [provideRouter([])] });
@@ -17,9 +32,8 @@ describe('ElencoTornei', () => {
       { idf_torneo: 2, idf_user: 7, nome: 'Trofeo', data_creazione: '2026-11-16T10:00:00Z', stato: 'concluso', piazzamento: '🏆 Campioni!' },
     ]);
     vi.spyOn(db, 'elimina').mockResolvedValue();
-    fixture = TestBed.createComponent(ElencoTornei);
-    await fixture.whenStable();
-    fixture.detectChanges();
+    giochi = [gioco(1, 'Doppie', true), gioco(2, 'Hanno / Anno', true)];
+    await render();
   });
 
   function click(selector: string): void {
@@ -45,5 +59,15 @@ describe('ElencoTornei', () => {
     click('.tournament-list__confirm .speak-btn');
     expect(fixture.nativeElement.querySelector('.tournament-list__confirm')).toBeNull();
     expect(db.elimina).not.toHaveBeenCalled();
+  });
+
+  it('should keep the tournament locked until every game is passed', async () => {
+    giochi = [gioco(1, 'Doppie', true), gioco(2, 'Hanno / Anno', false)];
+    await render();
+    const text = fixture.nativeElement.textContent;
+    expect(text).toContain('Il torneo è ancora chiuso');
+    expect(text).toContain('Hanno / Anno');
+    expect(text).toContain('1 su 2');
+    expect(fixture.nativeElement.querySelector('.tournament-form')).toBeNull();
   });
 });

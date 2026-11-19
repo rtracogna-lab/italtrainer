@@ -4,7 +4,25 @@
 
   <div class="home__grid">
     @for (challenge of challenges; track challenge.route) {
-      <a class="challenge-card" [class.challenge-card--highlight]="challenge.highlight" [routerLink]="challenge.route">
+      <a
+        class="challenge-card"
+        [class.challenge-card--highlight]="challenge.highlight"
+        [class.challenge-card--locked]="mostraStato() && isTorneo(challenge) && !torneoAbilitato()"
+        [routerLink]="challenge.route"
+      >
+        @if (mostraStato()) {
+          @if (isSuperato(challenge)) {
+            <span class="challenge-card__badge challenge-card__badge--done" title="Gioco superato">✅ Superato</span>
+          } @else if (isTorneo(challenge)) {
+            @if (torneoAbilitato()) {
+              <span class="challenge-card__badge challenge-card__badge--done" title="Torneo sbloccato">🔓 Sbloccato</span>
+            } @else {
+              <span class="challenge-card__badge" title="Supera tutti i giochi per sbloccarlo">
+                🔒 {{ contaSuperati() }}/{{ totaleGiochi() }} giochi
+              </span>
+            }
+          }
+        }
         <span class="challenge-card__icon">{{ challenge.icon }}</span>
         <h2 class="challenge-card__title">{{ challenge.title }}</h2>
         <p class="challenge-card__description">{{ challenge.description }}</p>

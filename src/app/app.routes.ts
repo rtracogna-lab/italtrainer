@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { abilitatoTorneo } from './features/torneo/abilitazione';
 
 export const routes: Routes = [
   {
@@ -80,11 +81,13 @@ export const routes: Routes = [
   },
   {
     path: 'torneo/:id',
+    canActivate: [abilitatoTorneo],
     loadComponent: () => import('./features/torneo/tabellone/tabellone').then((m) => m.Tabellone),
     title: 'ItalTrainer - Torneo',
   },
   {
     path: 'torneo/:id/partita/:idPartita',
+    canActivate: [abilitatoTorneo],
     loadComponent: () =>
       import('./features/torneo/partita-torneo/partita-torneo').then((m) => m.PartitaTorneo),
     title: 'ItalTrainer - Torneo',
