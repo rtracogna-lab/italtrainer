@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Auth } from '../../core/auth';
@@ -12,6 +12,11 @@ import { Auth } from '../../core/auth';
 export class Login {
   private readonly auth = inject(Auth);
   private readonly router = inject(Router);
+
+  // Dentro la finestra della home: dopo l'accesso non si cambia pagina, si
+  // avvisa chi l'ha aperta.
+  readonly embedded = input(false);
+  readonly done = output<void>();
 
   protected utente = '';
   protected pwd = '';
@@ -27,7 +32,9 @@ export class Login {
     this.error.set('');
     try {
       const ok = await this.auth.login(this.utente.trim(), this.pwd);
-      if (ok) {
+      if (ok && this.embedded()) {
+        this.done.emit();
+      } else if (ok) {
         await this.router.navigateByUrl('/');
       } else {
         this.error.set('Utente o password non corretti.');

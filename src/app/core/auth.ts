@@ -15,6 +15,10 @@ export class Auth {
   readonly user = this.current.asReadonly();
   readonly loggedIn = computed(() => this.current() !== null);
 
+  // La home propone l'accesso solo al primo caricamento dell'app, non ogni
+  // volta che ci si torna da un gioco.
+  loginPromptShown = false;
+
   /** Restituisce true se utente e password sono corretti. */
   async login(utente: string, pwd: string): Promise<boolean> {
     const { data, error } = await supabase.rpc('login', { p_utente: utente, p_pwd: pwd });

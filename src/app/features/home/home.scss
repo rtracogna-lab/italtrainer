@@ -106,3 +106,33 @@
     }
   }
 }
+
+.login-dialog {
+  width: min(400px, calc(100vw - 2rem));
+  padding: 1.5rem 1rem 1rem;
+  border: none;
+  border-radius: 16px;
+  background: #f5f6fa;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+
+  &::backdrop {
+    background: rgba(20, 28, 50, 0.55);
+  }
+
+  app-login {
+    display: flex;
+    justify-content: center;
+  }
+
+  &__skip {
+    display: block;
+    margin: 1rem auto 0;
+    padding: 0.4rem 0.8rem;
+    border: none;
+    background: none;
+    color: #2b3a67;
+    font: inherit;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+}

@@ -30,3 +30,9 @@
     }
   </div>
 </section>
+
+<!-- Accesso proposto all'apertura dell'app: si può anche giocare senza. -->
+<dialog #loginDialog class="login-dialog" aria-label="Accedi">
+  <app-login [embedded]="true" (done)="onLoggedIn()" />
+  <button type="button" class="login-dialog__skip" (click)="closeLogin()">Continua senza accedere</button>
+</dialog>

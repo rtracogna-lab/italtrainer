@@ -1,7 +1,8 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { AfterViewInit, Component, computed, ElementRef, inject, OnInit, signal, viewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Auth } from '../../core/auth';
 import { GiocoSuperato, PERCORSO_GIOCO, Risultati } from '../../core/risultati';
+import { Login } from '../login/login';
 
 const TORNEO = '/torneo';
 // Gioco della tabella giochi per ogni pagina.
@@ -17,12 +18,12 @@ interface Challenge {
 }
 
 @Component({
-  imports: [RouterLink],
+  imports: [Login, RouterLink],
   selector: 'app-home',
   styleUrl: './home.scss',
   templateUrl: './home.html',
 })
-export class Home implements OnInit {
+export class Home implements OnInit, AfterViewInit {
   protected readonly auth = inject(Auth);
   private readonly risultati = inject(Risultati);
 
@@ -36,7 +37,41 @@ export class Home implements OnInit {
   protected readonly contaSuperati = computed(() => this.superati().size);
   protected readonly totaleGiochi = computed(() => this.giochi().length);
 
-  async ngOnInit(): Promise<void> {
+  private readonly loginDialog = viewChild.required<ElementRef<HTMLDialogElement>>('loginDialog');
+
+  ngOnInit(): void {
+    void this.loadGiochi();
+  }
+
+  ngAfterViewInit(): void {
+    if (this.auth.loggedIn() || this.auth.loginPromptShown) {
+      return;
+    }
+    this.auth.loginPromptShown = true;
+    const dialog = this.loginDialog().nativeElement;
+    // showModal manca in qualche browser vecchio (e in jsdom).
+    if (typeof dialog.showModal === 'function') {
+      dialog.showModal();
+    } else {
+      dialog.setAttribute('open', '');
+    }
+  }
+
+  protected closeLogin(): void {
+    const dialog = this.loginDialog().nativeElement;
+    if (typeof dialog.close === 'function') {
+      dialog.close();
+    } else {
+      dialog.removeAttribute('open');
+    }
+  }
+
+  protected onLoggedIn(): void {
+    this.closeLogin();
+    void this.loadGiochi();
+  }
+
+  private async loadGiochi(): Promise<void> {
     const user = this.auth.user();
     if (!user) {
       return;
