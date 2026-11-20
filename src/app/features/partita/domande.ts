@@ -1,6 +1,7 @@
 import { OPTIONS as CE_CIE_OPTIONS, WORDS as CE_CIE_WORDS } from '../ce-cie/ce-cie';
 import { WORDS as DOPPIE_WORDS } from '../doppie/doppie';
 import { GROUPS, sentenceParts } from '../hanno-anno/frasi';
+import { PRONOMI_GROUPS } from '../pronomi-combinati/frasi';
 import { OPTIONS as QU_CU_OPTIONS, WORDS as QU_CU_WORDS } from '../qui-quo-qua/qui-quo-qua';
 import { shuffle } from '../../shared/shuffle';
 import { GHE_GHI_QUESTIONS } from './ghe-ghi';
@@ -18,7 +19,7 @@ export interface MatchQuestion {
   tip?: string;
 }
 
-const APOSTROPHE_GROUPS = ['lo-lho', 'glielo'];
+const APOSTROPHE_GROUPS = ['lo-lho'];
 
 const CE_CIE_QUESTIONS: MatchQuestion[] = CE_CIE_WORDS.map(({ clue, hint, prefix, missing, suffix, tip }) => ({
   clue,
@@ -41,11 +42,13 @@ export const QUESTION_SOURCES: MatchQuestion[][] = [
   CE_CIE_QUESTIONS.filter(isPlural),
   GHE_GHI_QUESTIONS,
   M_N_QUESTIONS,
-  // Le frasi con l'apostrofo (l'ho, gliel'ho...) sono le più difficili: hanno
-  // una fonte tutta loro, così escono più spesso delle altre di Hanno/Anno.
+  // Le frasi con l'apostrofo (l'ho...) e i pronomi combinati (glielo,
+  // gliel'ho...) sono le più difficili: hanno una fonte tutta loro, così escono
+  // più spesso delle altre di Hanno/Anno.
   ...[
     GROUPS.filter((group) => !APOSTROPHE_GROUPS.includes(group.id)),
     ...APOSTROPHE_GROUPS.map((id) => GROUPS.filter((group) => group.id === id)),
+    PRONOMI_GROUPS,
   ].map((groups) =>
     groups
       .flatMap((group) => group.sentences)

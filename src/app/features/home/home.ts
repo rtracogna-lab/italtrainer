@@ -66,9 +66,15 @@ export class Home implements OnInit {
     },
     {
       title: 'Hanno / Anno',
-      description: `Impara a distinguere "ha/a", "hanno/anno", "hai/ai", "ho/o", "è/e", "c'è/ce", "l'ho/lo", "gliel'ho/glielo" e "ah/oh/ahi".`,
+      description: `Impara a distinguere "ha/a", "hanno/anno", "hai/ai", "ho/o", "è/e", "c'è/ce", "l'ho/lo" e "ah/oh/ahi".`,
       icon: '📅',
       route: '/hanno-anno',
+    },
+    {
+      title: 'Pronomi combinati',
+      description: `Glielo, gliela, glieli, gliele, gliene e gliel'ho: scegli quello giusto e scrivilo tutto attaccato.`,
+      icon: '🎁',
+      route: '/pronomi-combinati',
     },
     {
       title: 'Giusto o sbagliato?',

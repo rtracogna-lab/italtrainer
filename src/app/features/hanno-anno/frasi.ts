@@ -16,11 +16,11 @@ export interface SentenceGroup {
 // Frase come [prima, risposta, dopo] più, se servono, opzioni diverse da
 // quelle del gruppo. Se la risposta è maiuscola (inizio frase), le opzioni
 // del gruppo diventano maiuscole da sole.
-type Row = [before: string, answer: string, after: string, options?: string[]];
+export type Row = [before: string, answer: string, after: string, options?: string[]];
 
 const capitalize = (word: string) => word.charAt(0).toUpperCase() + word.slice(1);
 
-function group(id: string, label: string, options: string[], tip: string, rows: Row[]): SentenceGroup {
+export function group(id: string, label: string, options: string[], tip: string, rows: Row[]): SentenceGroup {
   return {
     id,
     label,
@@ -48,8 +48,6 @@ export function fullSentence(sentence: HannoAnnoSentence): string {
 const LO = ['lo', "l'ho"];
 const LA = ['la', "l'ha"];
 const L_ANNO = ["l'anno", "l'hanno"];
-const GLIELO = ['glielo', "gliel'ho"];
-const GLIELA = ['gliela', "gliel'ha"];
 
 export const GROUPS: SentenceGroup[] = [
   group(
@@ -302,50 +300,6 @@ export const GROUPS: SentenceGroup[] = [
       ['Il cane? La mamma', "l'ha", 'portato fuori.', ['lo', "l'ha"]],
       ['Il quaderno? Non', "l'ho", 'portato a scuola.'],
       ['Ci vediamo', "l'anno", 'prossimo!', L_ANNO],
-    ],
-  ),
-  // Opzioni diverse per ogni frase: glielo/gliel'ho, gliela/gliel'ha,
-  // gliel'ha/gliel'hanno.
-  group(
-    'glielo',
-    "glielo / gliel'ho",
-    GLIELO,
-    'Prova a dire "gliel\'avevo", "gliel\'aveva" o "gliel\'avevano": se la frase ha ancora senso, si scrive con l\'apostrofo e l\'h.',
-    [
-      ['Non so se', "gliel'ho", 'già detto oppure no.'],
-      ['Non', 'glielo', 'voglio più chiedere.'],
-      ['Lei', "gliel'ha", 'promesso ieri, durante la riunione.', ['glielo', "gliel'ha"]],
-      ['Loro', "gliel'hanno", 'ripetuto più volte, ma lui fa finta di niente.', ["gliel'ha", "gliel'hanno"]],
-      ['Mara aveva la penna nuova e Silvia per dispetto', "gliel'ha", 'nascosta.', GLIELA],
-      ['Dario mi ha affidato la sua gattina ed io', 'gliela', 'sorveglierò.', GLIELA],
-      ['La mamma ha una bella collana,', "gliel'ha", 'regalata il babbo.', GLIELA],
-      ['Marco non trova il libro, ma', "gliel'ho", 'lasciato sul tavolo.'],
-      ['Andrea ha chiesto il libro a Paolo e lui', "gliel'ha", 'prestato subito.', ['glielo', "gliel'ha"]],
-      ['Il regalo per la nonna? Domani', 'glielo', 'porto io.'],
-      ['Quando la maestra chiede il quaderno, io', 'glielo', 'do subito.'],
-      ['La lettera per la zia? I bambini', "gliel'hanno", 'scritta insieme.', ["gliel'ha", "gliel'hanno"]],
-      ['Il pallone di Luca? Ieri', "gliel'ho", 'restituito.'],
-      ['Se la nonna vuole la ricetta,', 'gliela', 'scrivo io.', GLIELA],
-      ['Quel disegno è per la mamma: domani', 'glielo', 'regalo.'],
-      ['Il papà cercava il telefono e Sara', "gliel'ha", 'trovato.', ['glielo', "gliel'ha"]],
-      ['La maestra voleva la verifica e io', "gliel'ho", 'consegnata subito.', ['gliela', "gliel'ho"]],
-      ['Marco ha dimenticato la merenda, così io', 'gliela', 'compro.', GLIELA],
-      ['Il nonno voleva il giornale e i bambini', "gliel'hanno", 'portato.', ["gliel'ha", "gliel'hanno"]],
-      ['Se Luca non capisce il compito,', 'glielo', 'spiego io.'],
-      ['Hai dato il libro a Giulia? Sì,', "gliel'ho", 'dato stamattina.'],
-      ['La palla era di Paolo e Marta', "gliel'ha", 'rotta.', GLIELA],
-      ['Il cane vuole il biscotto: adesso', 'glielo', 'do.'],
-      ['La maestra voleva sapere la verità e i bambini', "gliel'hanno", 'detta.', ['gliela', "gliel'hanno"]],
-      ['Il nonno voleva il giornale e io', "gliel'ho", 'comprato.'],
-      ['Giulia ama i fiori: domani', 'glieli', 'porto.', ['glieli', "gliel'ho"]],
-      ['La zia voleva la torta e la mamma', "gliel'ha", 'preparata.', GLIELA],
-      ['Il gatto vuole la pappa: adesso', 'gliela', 'do.', GLIELA],
-      ['Paolo ha chiesto la penna e io', "gliel'ho", 'prestata.', ['gliela', "gliel'ho"]],
-      ['Il maestro ha chiesto il compito e i ragazzi', "gliel'hanno", 'consegnato.', ["gliel'ha", "gliel'hanno"]],
-      ['Se Marco vuole il pallone,', 'glielo', 'lancio.'],
-      ['La nonna voleva una foto e il papà', "gliel'ha", 'mandata.', GLIELA],
-      ['Il regalo era per Luca e io', "gliel'ho", 'dato ieri.'],
-      ['Sara ha perso la sciarpa: la maestra', "gliel'ha", 'trovata.', GLIELA],
     ],
   ),
   group(

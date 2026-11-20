@@ -19,6 +19,12 @@ export const routes: Routes = [
     title: 'ItalTrainer - Hanno / Anno',
   },
   {
+    path: 'pronomi-combinati',
+    loadComponent: () =>
+      import('./features/pronomi-combinati/pronomi-combinati').then((m) => m.PronomiCombinati),
+    title: 'ItalTrainer - Pronomi combinati',
+  },
+  {
     path: 'giusto-sbagliato',
     loadComponent: () =>
       import('./features/giusto-sbagliato/giusto-sbagliato').then((m) => m.GiustoSbagliato),

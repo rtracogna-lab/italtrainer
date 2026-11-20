@@ -12,6 +12,7 @@ export const GIOCO_QUI_QUO_QUA = 7;
 export const GIOCO_CE_CIE = 8;
 export const GIOCO_LETTERA_MANCANTE = 9;
 export const GIOCO_SILLABE = 10;
+export const GIOCO_PRONOMI_COMBINATI = 11;
 
 // Pagina di ogni gioco, per mandare il bambino a quelli non ancora superati.
 export const PERCORSO_GIOCO: Record<number, string> = {
@@ -25,6 +26,7 @@ export const PERCORSO_GIOCO: Record<number, string> = {
   [GIOCO_CE_CIE]: '/ce-cie',
   [GIOCO_LETTERA_MANCANTE]: '/lettera-mancante',
   [GIOCO_SILLABE]: '/sillabe',
+  [GIOCO_PRONOMI_COMBINATI]: '/pronomi-combinati',
 };
 
 // Un gioco è superato quando l'utente ha fatto almeno una volta un punteggio

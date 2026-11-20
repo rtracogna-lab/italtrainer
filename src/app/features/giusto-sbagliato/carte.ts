@@ -1,4 +1,5 @@
 import { fullSentence, GROUPS, HannoAnnoSentence, sentenceParts } from '../hanno-anno/frasi';
+import { PRONOMI_GROUPS } from '../pronomi-combinati/frasi';
 import { shuffle } from '../../shared/shuffle';
 
 // Frase mostrata per intero: giusta, oppure con la parola sbagliata al posto
@@ -11,7 +12,7 @@ export interface Card {
 
 // Le esclamazioni restano fuori: tra "ah" e "oh" a volte vanno bene tutte e
 // due, e una frase "sbagliata" potrebbe sembrare giusta.
-const POOL = GROUPS.filter((group) => group.id !== 'esclamazioni').flatMap((group) => group.sentences);
+const POOL = [...GROUPS.filter((group) => group.id !== 'esclamazioni'), ...PRONOMI_GROUPS].flatMap((group) => group.sentences);
 
 export function makeCards(random = Math.random): Card[] {
   return shuffle(POOL).map((sentence) => {
