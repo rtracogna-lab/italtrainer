@@ -4,12 +4,36 @@ const GLIELO = ['glielo', "gliel'ho"];
 const GLIELA = ['gliela', "gliel'ha"];
 const GENERE_NUMERO = ['glielo', 'gliela', 'glieli', 'gliele'];
 
+// Parole che possono stare tra il pronome e il verbo ("gliel'ho già detto").
+const NON_VERBI = new Set(['già', 'più', 'mai', 'ancora', 'appena', 'sempre']);
+const AVEVA: Record<string, string> = { "gliel'ho": "gliel'avevo", "gliel'ha": "gliel'aveva", "gliel'hanno": "gliel'avevano" };
+
+// Il suggerimento di glielo / gliel'ho dice per ogni frase se il verbo è al
+// passato, così il bambino impara a guardare il verbo che segue. Le frasi in
+// cui si sceglie solo tra gliel'ha e gliel'hanno tengono quello del gruppo.
+function tenseTips(sentences: SentenceGroup): SentenceGroup {
+  return {
+    ...sentences,
+    sentences: sentences.sentences.map((sentence) => {
+      if (sentence.options.every((option) => option.includes("'"))) {
+        return sentence;
+      }
+      const verb = sentence.after.split(/[\s,.!?]+/).find((word) => word && !NON_VERBI.has(word)) ?? '';
+      const answer = sentence.answer.toLowerCase();
+      const tip = answer.includes("'")
+        ? `"${verb}" è al passato: ci vuole "ho/ha/hanno", quindi si scrive "${answer}" con l'apostrofo e l'h (prova: "${AVEVA[answer]} ${verb}").`
+        : `"${verb}" non è al passato: non c'è nessun "ho/ha/hanno", quindi si scrive "${answer}" senza h. Al passato sarebbe "gliel'ho" (es. ieri gliel'ho dato).`;
+      return { ...sentence, tip };
+    }),
+  };
+}
+
 // Pronomi combinati con "gli": la stessa forma delle frasi di Hanno / Anno,
 // così La partita e Giusto o sbagliato possono usarle insieme alle altre.
 export const PRONOMI_GROUPS: SentenceGroup[] = [
   // Opzioni diverse per ogni frase: glielo/gliel'ho, gliela/gliel'ha,
   // gliel'ha/gliel'hanno.
-  group(
+  tenseTips(group(
     'glielo',
     "glielo / gliel'ho",
     GLIELO,
@@ -49,8 +73,29 @@ export const PRONOMI_GROUPS: SentenceGroup[] = [
       ['La nonna voleva una foto e il papà', "gliel'ha", 'mandata.', GLIELA],
       ['Il regalo era per Luca e io', "gliel'ho", 'dato ieri.'],
       ['Sara ha perso la sciarpa: la maestra', "gliel'ha", 'trovata.', GLIELA],
+      // Coppie passato / presente: stessa cosa, cambia solo il tempo del verbo.
+      ['Il libro di Luca? Ieri', "gliel'ho", 'dato.'],
+      ['Il libro di Luca? Domani', 'glielo', 'do.'],
+      ['Il segreto? Ieri sera', "gliel'ho", 'raccontato.'],
+      ['Il segreto? Adesso', 'glielo', 'racconto.'],
+      ['Il regalo per il nonno? La settimana scorsa', "gliel'ho", 'spedito.'],
+      ['Il regalo per il nonno? Domani', 'glielo', 'spedisco.'],
+      ['Il disegno? Stamattina', "gliel'ho", 'mostrato.'],
+      ['Il disegno? Fra poco', 'glielo', 'mostro.'],
+      ['La bici di Marco? Domenica', "gliel'ho", 'riparata.', ['gliela', "gliel'ho"]],
+      ['La bici di Marco? Oggi', 'gliela', 'riparo.', ['gliela', "gliel'ho"]],
+      ['La storia? Ieri sera la nonna', "gliel'ha", 'raccontata.', GLIELA],
+      ['La storia? Stasera la nonna', 'gliela', 'racconta.', GLIELA],
+      ['Il compito? La maestra', "gliel'ha", 'corretto ieri.', ['glielo', "gliel'ha"]],
+      ['Il compito? La maestra', 'glielo', 'corregge domani.', ['glielo', "gliel'ha"]],
+      ['Il quaderno? Ieri Paolo', "gliel'ha", 'prestato.', ['glielo', "gliel'ha"]],
+      ['Il quaderno? Oggi Paolo', 'glielo', 'presta.', ['glielo', "gliel'ha"]],
+      ['Il pallone? Stamattina i ragazzi', "gliel'hanno", 'restituito.', ['glielo', "gliel'hanno"]],
+      ['Il pallone? Domani i ragazzi', 'glielo', 'restituiscono.', ['glielo', "gliel'hanno"]],
+      ['La merenda? Prima la mamma', "gliel'ha", 'preparata.', GLIELA],
+      ['La merenda? Adesso la mamma', 'gliela', 'prepara.', GLIELA],
     ],
-  ),
+  )),
   group(
     'genere-numero',
     'glielo / gliela / glieli / gliele',

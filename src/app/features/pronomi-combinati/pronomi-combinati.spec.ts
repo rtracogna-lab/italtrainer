@@ -45,6 +45,15 @@ describe('PronomiCombinati', () => {
     expect(fixture.nativeElement.textContent).toContain('sempre attaccati');
   });
 
+  it('should explain from the verb whether the pronoun needs the h', () => {
+    const glielo = PRONOMI_GROUPS.find((group) => group.id === 'glielo')!.sentences;
+    const tip = (answer: string, after: string) => glielo.find((s) => s.answer === answer && s.after === after)!.tip;
+    expect(tip("gliel'ho", 'dato.')).toContain('"dato" è al passato');
+    expect(tip("gliel'ho", 'dato.')).toContain("gliel'avevo dato");
+    expect(tip('glielo', 'do.')).toContain('"do" non è al passato');
+    expect(tip("gliel'ho", 'già detto oppure no.')).toContain('"detto" è al passato');
+  });
+
   it('should read the sentence with the pronoun in place', () => {
     const c = fixture.componentInstance as any;
     c.sentences.set([{ before: 'Il cane vuole il biscotto: adesso', after: 'do.', answer: 'glielo', options: ['glielo', "gliel'ho"], tip: '' }]);
