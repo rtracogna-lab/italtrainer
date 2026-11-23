@@ -1,6 +1,6 @@
 @if (auth.loggedIn()) {
   <div class="leaderboard">
-    <h3 class="leaderboard__title">🏅 I 10 migliori risultati</h3>
+    <h3 class="leaderboard__title">🏅 I tuoi 10 migliori risultati</h3>
     @switch (state()) {
       @case ('loading') {
         <p class="leaderboard__message">Carico la classifica…</p>
@@ -11,16 +11,15 @@
       @default {
         <p class="leaderboard__message">
           @if (newPosition() <= rows().length) {
-            Con {{ points() }} punti sei al <strong>{{ newPosition() }}° posto</strong>!
+            Con {{ points() }} punti è il tuo <strong>{{ newPosition() }}° miglior risultato</strong>!
           } @else {
-            Con {{ points() }} punti sei al {{ newPosition() }}° posto: fuori dai primi 10.
+            Con {{ points() }} punti è il tuo {{ newPosition() }}° risultato: fuori dai tuoi primi 10.
           }
         </p>
         <table class="leaderboard__table">
           <thead>
             <tr>
               <th>#</th>
-              <th>Chi</th>
               <th>Punti</th>
               <th>Quando</th>
             </tr>
@@ -29,7 +28,6 @@
             @for (row of rows(); track row.position) {
               <tr [class.leaderboard__row--new]="row.isNew">
                 <td>{{ row.position }}</td>
-                <td>{{ row.user }}</td>
                 <td>{{ row.points }}</td>
                 <td>
                   @if (row.date) {

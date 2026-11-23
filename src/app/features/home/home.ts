@@ -1,10 +1,9 @@
 import { AfterViewInit, Component, computed, ElementRef, inject, OnInit, signal, viewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Auth } from '../../core/auth';
-import { GiocoSuperato, PERCORSO_GIOCO, Risultati } from '../../core/risultati';
+import { GIOCHI_NASCOSTI, GiocoSuperato, PERCORSO_GIOCO, Risultati } from '../../core/risultati';
 import { Login } from '../login/login';
 
-const TORNEO = '/torneo';
 // Gioco della tabella giochi per ogni pagina.
 const GIOCO_DA_PERCORSO = new Map(Object.entries(PERCORSO_GIOCO).map(([gioco, percorso]) => [percorso, Number(gioco)]));
 
@@ -15,6 +14,14 @@ interface Challenge {
   route: string;
   // Messa in evidenza in fondo all'elenco, a tutta larghezza.
   highlight?: boolean;
+  // Tolta dalla scelta, ma la pagina resta. Per i giochi della tabella giochi
+  // vale GIOCHI_NASCOSTI.
+  hidden?: boolean;
+}
+
+function isHidden(challenge: Challenge): boolean {
+  const gioco = GIOCO_DA_PERCORSO.get(challenge.route);
+  return !!challenge.hidden || (gioco !== undefined && GIOCHI_NASCOSTI.has(gioco));
 }
 
 @Component({
@@ -33,9 +40,6 @@ export class Home implements OnInit, AfterViewInit {
     () => new Set(this.giochi().filter((gioco) => gioco.superato).map((gioco) => gioco.idf_gioco)),
   );
   protected readonly mostraStato = computed(() => this.auth.loggedIn() && this.giochi().length > 0);
-  protected readonly torneoAbilitato = computed(() => this.superati().size === this.giochi().length);
-  protected readonly contaSuperati = computed(() => this.superati().size);
-  protected readonly totaleGiochi = computed(() => this.giochi().length);
 
   private readonly loginDialog = viewChild.required<ElementRef<HTMLDialogElement>>('loginDialog');
 
@@ -83,16 +87,12 @@ export class Home implements OnInit, AfterViewInit {
     }
   }
 
-  protected isTorneo(challenge: Challenge): boolean {
-    return challenge.route === TORNEO;
-  }
-
   protected isSuperato(challenge: Challenge): boolean {
     const gioco = GIOCO_DA_PERCORSO.get(challenge.route);
     return gioco !== undefined && this.superati().has(gioco);
   }
 
-  protected readonly challenges: Challenge[] = [
+  protected readonly challenges: Challenge[] = ([
     {
       title: 'Doppie',
       description: 'Allenati a riconoscere le consonanti doppie.',
@@ -177,6 +177,7 @@ export class Home implements OnInit, AfterViewInit {
       icon: '✏️',
       route: '/dettato',
       highlight: true,
+      hidden: true,
     },
-  ];
+  ] satisfies Challenge[]).filter((challenge) => !isHidden(challenge));
 }

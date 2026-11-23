@@ -1,9 +1,8 @@
 import { DatePipe } from '@angular/common';
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Auth } from '../../../core/auth';
-import { GiocoSuperato, PERCORSO_GIOCO, Risultati } from '../../../core/risultati';
 import { Torneo } from '../regole';
 import { TorneiDb } from '../tornei-db';
 
@@ -21,7 +20,6 @@ function oggi(): string {
 export class ElencoTornei implements OnInit {
   protected readonly auth = inject(Auth);
   private readonly db = inject(TorneiDb);
-  private readonly risultati = inject(Risultati);
   private readonly router = inject(Router);
 
   protected nome = `Torneo del ${oggi()}`;
@@ -34,12 +32,6 @@ export class ElencoTornei implements OnInit {
   protected readonly confirming = signal<number | null>(null);
   protected readonly deleting = signal(false);
 
-  // Il torneo si sblocca superando tutti i giochi.
-  protected readonly giochi = signal<GiocoSuperato[]>([]);
-  protected readonly daSuperare = computed(() => this.giochi().filter((gioco) => !gioco.superato));
-  protected readonly abilitato = computed(() => this.giochi().length > 0 && this.daSuperare().length === 0);
-  protected readonly percorso = PERCORSO_GIOCO;
-
   async ngOnInit(): Promise<void> {
     const user = this.auth.user();
     if (!user) {
@@ -47,10 +39,6 @@ export class ElencoTornei implements OnInit {
       return;
     }
     try {
-      this.giochi.set(await this.risultati.giochiSuperati(user.idf_user));
-      if (!this.abilitato()) {
-        return;
-      }
       this.tornei.set(await this.db.elenco(user.idf_user));
     } catch {
       this.error.set('Impossibile collegarsi al server. Riprova più tardi.');

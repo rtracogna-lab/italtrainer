@@ -13,8 +13,8 @@ describe('Leaderboard', () => {
     const risultati = TestBed.inject(Risultati);
     vi.spyOn(risultati, 'classifica').mockResolvedValue({
       migliori: [
-        { utente: 'luca', risultato: 1400, data_ora: '2026-11-01T10:00:00Z' },
-        { utente: 'anna', risultato: 900, data_ora: '2026-11-02T10:00:00Z' },
+        { utente: 'mario', risultato: 1400, data_ora: '2026-11-01T10:00:00Z' },
+        { utente: 'mario', risultato: 900, data_ora: '2026-11-02T10:00:00Z' },
       ],
       posizione: 2,
     });
@@ -36,18 +36,19 @@ describe('Leaderboard', () => {
     expect(TestBed.inject(Risultati).classifica).not.toHaveBeenCalled();
   });
 
-  it('should place the new score among the best of all users and save it', async () => {
+  it('should place the new score among the best results of the user and save it', async () => {
     (TestBed.inject(Auth) as any).current.set({ idf_user: 7, utente: 'mario' });
     const c = create() as any;
     await fixture.whenStable();
     fixture.detectChanges();
 
     expect(c.rows().map((row: any) => [row.position, row.user, row.points, row.isNew])).toEqual([
-      [1, 'luca', 1400, false],
+      [1, 'mario', 1400, false],
       [2, 'mario', 1350, true],
-      [3, 'anna', 900, false],
+      [3, 'mario', 900, false],
     ]);
-    expect(fixture.nativeElement.textContent).toContain('2° posto');
+    expect(TestBed.inject(Risultati).classifica).toHaveBeenCalledWith(8, 7, 1350);
+    expect(fixture.nativeElement.textContent).toContain('2° miglior risultato');
 
     fixture.nativeElement.querySelector('.next-btn').click();
     await fixture.whenStable();

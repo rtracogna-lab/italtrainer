@@ -33,26 +33,23 @@ describe('Home', () => {
     expect(element.querySelector('.challenge-card__badge')).toBeNull();
   });
 
-  it('should mark passed games and lock the tournament', async () => {
+  it('should mark passed games', async () => {
     const element = await render([
       { idf_gioco: 1, descrizione_gioco: 'Doppie', superato: true },
       { idf_gioco: 2, descrizione_gioco: 'Hanno / Anno', superato: false },
     ]);
     expect(card(element, 'Doppie').textContent).toContain('Superato');
     expect(card(element, 'Hanno / Anno').textContent).not.toContain('Superato');
-    const torneo = card(element, 'Torneo');
-    expect(torneo.classList).toContain('challenge-card--locked');
-    expect(torneo.textContent).toContain('1/2 giochi');
+    expect(card(element, 'Torneo').querySelector('.challenge-card__badge')).toBeNull();
   });
 
-  it('should unlock the tournament when every game is passed', async () => {
-    const element = await render([
-      { idf_gioco: 1, descrizione_gioco: 'Doppie', superato: true },
-      { idf_gioco: 2, descrizione_gioco: 'Hanno / Anno', superato: true },
-    ]);
-    const torneo = card(element, 'Torneo');
-    expect(torneo.classList).not.toContain('challenge-card--locked');
-    expect(torneo.textContent).toContain('Sbloccato');
+  it('should leave the hidden games and the dictation out of the choice', async () => {
+    const element = await render(null);
+    const titles = Array.from(element.querySelectorAll('.challenge-card__title')).map((t) => t.textContent!.trim());
+    for (const hidden of ['Dettato', 'Parole Unite', 'Spezza le Parole', 'Qui Quo Qua', 'Lettera mancante']) {
+      expect(titles).not.toContain(hidden);
+    }
+    expect(titles).toContain('Doppie');
   });
 
   it('should open the login window on first load when logged out', async () => {

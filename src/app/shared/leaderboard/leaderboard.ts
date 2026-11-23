@@ -14,7 +14,7 @@ export interface LeaderboardRow {
   isNew: boolean;
 }
 
-// Migliori risultati di tutti gli utenti per un gioco, con il nuovo punteggio
+// Migliori risultati dell'utente collegato per un gioco, con il nuovo punteggio
 // al suo posto e il pulsante per salvarlo. Si vede solo dopo l'accesso; va
 // creato a fine partita, così "Ricomincia" lo distrugge e lo azzera.
 @Component({
@@ -52,7 +52,7 @@ export class Leaderboard implements OnInit, OnDestroy {
     }
     const points = this.points();
     try {
-      const { migliori, posizione } = await this.risultati.classifica(this.game(), points);
+      const { migliori, posizione } = await this.risultati.classifica(this.game(), user.idf_user, points);
       if (this.destroyed) {
         return;
       }

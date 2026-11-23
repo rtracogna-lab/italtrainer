@@ -7,26 +7,6 @@
       <p>Per giocare un torneo devi prima accedere: così il tabellone resta salvato e puoi riprenderlo quando vuoi.</p>
       <a class="next-btn" routerLink="/login">Accedi</a>
     </div>
-  } @else if (loading() && giochi().length === 0) {
-    <p>Controllo i giochi superati…</p>
-  } @else if (giochi().length === 0) {
-    <p class="tournament-form__error" role="alert">{{ error() }}</p>
-  } @else if (!abilitato()) {
-    <div class="result-card tournament-lock">
-      <p class="tournament-lock__title">🔒 Il torneo è ancora chiuso</p>
-      <p>
-        Per giocarlo devi superare tutti i giochi: in ognuno fai un punteggio abbastanza alto, cioè senza più di 3
-        errori e rispondendo in fretta. Ti mancano:
-      </p>
-      <ul class="tournament-lock__list">
-        @for (gioco of daSuperare(); track gioco.idf_gioco) {
-          <li>
-            <a [routerLink]="percorso[gioco.idf_gioco] ?? '/'">{{ gioco.descrizione_gioco }}</a>
-          </li>
-        }
-      </ul>
-      <p>Giochi superati: {{ giochi().length - daSuperare().length }} su {{ giochi().length }}</p>
-    </div>
   } @else {
     <form class="tournament-form" (ngSubmit)="create()">
       <h2 class="tournament-form__title">Nuovo torneo</h2>

@@ -14,7 +14,7 @@ export const GIOCO_LETTERA_MANCANTE = 9;
 export const GIOCO_SILLABE = 10;
 export const GIOCO_PRONOMI_COMBINATI = 11;
 
-// Pagina di ogni gioco, per mandare il bambino a quelli non ancora superati.
+// Pagina di ogni gioco.
 export const PERCORSO_GIOCO: Record<number, string> = {
   [GIOCO_DOPPIE]: '/doppie',
   [GIOCO_HANNO_ANNO]: '/hanno-anno',
@@ -28,6 +28,9 @@ export const PERCORSO_GIOCO: Record<number, string> = {
   [GIOCO_SILLABE]: '/sillabe',
   [GIOCO_PRONOMI_COMBINATI]: '/pronomi-combinati',
 };
+
+// Giochi tolti dalla scelta della home: le pagine esistono ancora.
+export const GIOCHI_NASCOSTI = new Set([GIOCO_PAROLE_UNITE, GIOCO_SPEZZA_PAROLE, GIOCO_QUI_QUO_QUA, GIOCO_LETTERA_MANCANTE]);
 
 // Un gioco è superato quando l'utente ha fatto almeno una volta un punteggio
 // pari o superiore alla soglia del gioco (supabase/superati.sql).
@@ -44,18 +47,19 @@ export interface Risultato {
 }
 
 export interface Classifica {
-  // I migliori risultati di tutti gli utenti.
+  // I migliori risultati dell'utente.
   migliori: Risultato[];
-  // Posizione che avrebbe il nuovo punteggio tra tutti i risultati salvati.
+  // Posizione che avrebbe il nuovo punteggio tra i risultati dell'utente.
   posizione: number;
 }
 
 @Injectable({ providedIn: 'root' })
 export class Risultati {
-  async classifica(idfGioco: number, punti: number): Promise<Classifica> {
+  // Classifica personale: solo i risultati dell'utente (supabase/classifica-utente.sql).
+  async classifica(idfGioco: number, idfUser: number, punti: number): Promise<Classifica> {
     const [migliori, posizione] = await Promise.all([
-      supabase.rpc('migliori_risultati', { p_idf_gioco: idfGioco }),
-      supabase.rpc('posizione_risultato', { p_idf_gioco: idfGioco, p_risultato: punti }),
+      supabase.rpc('migliori_risultati_utente', { p_idf_gioco: idfGioco, p_idf_user: idfUser }),
+      supabase.rpc('posizione_risultato_utente', { p_idf_gioco: idfGioco, p_idf_user: idfUser, p_risultato: punti }),
     ]);
     if (migliori.error) {
       throw migliori.error;
