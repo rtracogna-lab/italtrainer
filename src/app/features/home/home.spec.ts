@@ -46,7 +46,7 @@ describe('Home', () => {
   it('should leave the hidden games and the dictation out of the choice', async () => {
     const element = await render(null);
     const titles = Array.from(element.querySelectorAll('.challenge-card__title')).map((t) => t.textContent!.trim());
-    for (const hidden of ['Dettato', 'Parole Unite', 'Spezza le Parole', 'Qui Quo Qua', 'Lettera mancante']) {
+    for (const hidden of ['Dettato', 'Parole Unite', 'Spezza le Parole', 'Qui Quo Qua', 'Lettera mancante', 'Ricostruisci la Frase']) {
       expect(titles).not.toContain(hidden);
     }
     expect(titles).toContain('Doppie');

@@ -30,7 +30,13 @@ export const PERCORSO_GIOCO: Record<number, string> = {
 };
 
 // Giochi tolti dalla scelta della home: le pagine esistono ancora.
-export const GIOCHI_NASCOSTI = new Set([GIOCO_PAROLE_UNITE, GIOCO_SPEZZA_PAROLE, GIOCO_QUI_QUO_QUA, GIOCO_LETTERA_MANCANTE]);
+export const GIOCHI_NASCOSTI = new Set([
+  GIOCO_PAROLE_UNITE,
+  GIOCO_SPEZZA_PAROLE,
+  GIOCO_RICOSTRUISCI_FRASE,
+  GIOCO_QUI_QUO_QUA,
+  GIOCO_LETTERA_MANCANTE,
+]);
 
 // Un gioco è superato quando l'utente ha fatto almeno una volta un punteggio
 // pari o superiore alla soglia del gioco (supabase/superati.sql).
