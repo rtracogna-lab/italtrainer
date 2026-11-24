@@ -76,12 +76,11 @@ export class Home implements OnInit, AfterViewInit {
   }
 
   private async loadGiochi(): Promise<void> {
-    const user = this.auth.user();
-    if (!user) {
+    if (!this.auth.loggedIn()) {
       return;
     }
     try {
-      this.giochi.set(await this.risultati.giochiSuperati(user.idf_user));
+      this.giochi.set(await this.risultati.giochiSuperati());
     } catch {
       // Senza server la home si vede lo stesso, solo senza le spunte.
     }

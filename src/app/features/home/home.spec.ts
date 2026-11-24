@@ -93,7 +93,7 @@ describe('Home', () => {
     fixture.detectChanges();
 
     expect(dialog.hasAttribute('open')).toBe(false);
-    expect(giochi).toHaveBeenCalledWith(7);
+    expect(giochi).toHaveBeenCalled();
     expect(card(element, 'Doppie').textContent).toContain('Superato');
   });
 });

@@ -52,7 +52,7 @@ export class Leaderboard implements OnInit, OnDestroy {
     }
     const points = this.points();
     try {
-      const { migliori, posizione } = await this.risultati.classifica(this.game(), user.idf_user, points);
+      const { migliori, posizione } = await this.risultati.classifica(this.game(), points);
       if (this.destroyed) {
         return;
       }

@@ -61,11 +61,12 @@ export interface Classifica {
 
 @Injectable({ providedIn: 'root' })
 export class Risultati {
-  // Classifica personale: solo i risultati dell'utente (supabase/classifica-utente.sql).
-  async classifica(idfGioco: number, idfUser: number, punti: number): Promise<Classifica> {
+  // Classifica personale: solo i risultati dell'utente collegato, che il
+  // server ricava dalla sessione (supabase/auth.sql).
+  async classifica(idfGioco: number, punti: number): Promise<Classifica> {
     const [migliori, posizione] = await Promise.all([
-      supabase.rpc('migliori_risultati_utente', { p_idf_gioco: idfGioco, p_idf_user: idfUser }),
-      supabase.rpc('posizione_risultato_utente', { p_idf_gioco: idfGioco, p_idf_user: idfUser, p_risultato: punti }),
+      supabase.rpc('migliori_risultati_utente', { p_idf_gioco: idfGioco }),
+      supabase.rpc('posizione_risultato_utente', { p_idf_gioco: idfGioco, p_risultato: punti }),
     ]);
     if (migliori.error) {
       throw migliori.error;
@@ -76,7 +77,8 @@ export class Risultati {
     return { migliori: migliori.data as Risultato[], posizione: posizione.data as number };
   }
 
-  // Niente .select() dopo l'insert: la tabella non è leggibile con la chiave anon.
+  // Niente .select() dopo l'insert: la tabella non è leggibile direttamente.
+  // Le regole RLS accettano solo risultati a nome dell'utente collegato.
   async salva(idfUser: number, idfGioco: number, punti: number): Promise<void> {
     const { error } = await supabase.from('risultati').insert({ idf_user: idfUser, idf_gioco: idfGioco, risultato: punti });
     if (error) {
@@ -84,8 +86,9 @@ export class Risultati {
     }
   }
 
-  async giochiSuperati(idfUser: number): Promise<GiocoSuperato[]> {
-    const { data, error } = await supabase.rpc('giochi_superati', { p_idf_user: idfUser });
+  // Giochi superati dall'utente collegato.
+  async giochiSuperati(): Promise<GiocoSuperato[]> {
+    const { data, error } = await supabase.rpc('giochi_superati');
     if (error) {
       throw error;
     }

@@ -47,7 +47,7 @@ describe('Leaderboard', () => {
       [2, 'mario', 1350, true],
       [3, 'mario', 900, false],
     ]);
-    expect(TestBed.inject(Risultati).classifica).toHaveBeenCalledWith(8, 7, 1350);
+    expect(TestBed.inject(Risultati).classifica).toHaveBeenCalledWith(8, 1350);
     expect(fixture.nativeElement.textContent).toContain('2° miglior risultato');
 
     fixture.nativeElement.querySelector('.next-btn').click();
